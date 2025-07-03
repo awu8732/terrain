@@ -6,9 +6,25 @@ from noise import pnoise2
 import numpy as np
 
 #don't forget BASE
+WINDOW_WIDTH = 800
+WINDOW_HEIGHT = 600
+WINDOW_FOV = 90
+WINDOW_CLIPPING_NEAR = 0.1
+WINDOW_CLIPPING_FAR = 1000.0
+
+HEIGHTMAP_WIDTH = 100
+HEIGHTMAP_DEPTH = 100
+HEIGHTMAP_SCALE_DEFAULT = 10
+HEIGHTMAP_OCTAVES_DEFAULT = 10
+HEIGHTMAP_PERSISTENCE_DEFAULT = 0.5
+HEIGHTMAP_LACUNARITY_DEFAULT = 2.0
 
 
-def generateHeightmap(width, depth, scale, octaves=4, persistence=0.5, lacunarity=2.0):
+def generateHeightmap(width, depth, 
+                      scale = HEIGHTMAP_SCALE_DEFAULT,
+                      octaves = HEIGHTMAP_OCTAVES_DEFAULT, 
+                      persistence = HEIGHTMAP_PERSISTENCE_DEFAULT,
+                      lacunarity = HEIGHTMAP_LACUNARITY_DEFAULT):
     heights = np.zeros((width, depth))
     for x in range(width):
         for z in range(depth):
@@ -21,7 +37,8 @@ def generateHeightmap(width, depth, scale, octaves=4, persistence=0.5, lacunarit
                                     lacunarity = lacunarity)
     return heights
 
-def generateMesh(heightmap, scale = 5):
+def generateMesh(heightmap, 
+                 scale = HEIGHTMAP_SCALE_DEFAULT):
     vertices = []
     indices = []
     width, depth = heightmap.shape
@@ -54,19 +71,19 @@ def renderTerrain(vertices, indices):
             glVertex3fv(vertex)
     glEnd()
 
-def initializeEnvironment():
+def configureEnvironment():
     pygame.init()
-    display = (800, 600)
+    display = (WINDOW_WIDTH, WINDOW_HEIGHT)
     pygame.display.set_mode(display, DOUBLEBUF | OPENGL)
-    gluPerspective(90, display[0] / display[1], 0.1, 1000.0)
+    gluPerspective(WINDOW_FOV, display[0] / display[1], WINDOW_CLIPPING_NEAR, WINDOW_CLIPPING_FAR)
     glTranslatef(-50, -10, -100)  # Adjust camera
     glEnable(GL_DEPTH_TEST)
 
 def main():
-    initializeEnvironment()
+    configureEnvironment()
     # Generate terrain
-    heightmap = generateHeightmap(100, 100, scale=10)
-    vertices, indices = generateMesh(heightmap, scale = 10)
+    heightmap = generateHeightmap(HEIGHTMAP_WIDTH, HEIGHTMAP_DEPTH)
+    vertices, indices = generateMesh(heightmap)
 
     # Rotation
     angle = 0
