@@ -2,7 +2,8 @@ import pygame
 from pygame.locals import *
 from OpenGL.GL import *
 from OpenGL.GLU import *
-import time
+from noise import pnoise2
+import numpy as np
 
 #PARAMETERS
 angle = 0
@@ -26,7 +27,7 @@ pygame.display.set_mode(display, DOUBLEBUF | OPENGL)
 clock = pygame.time.Clock()
 
 #Set perspective and view
-#deg FOV, aspect ratio, near clipping plane, far clipping plane
+#set camera: deg FOV, aspect ratio, near clipping plane, far clipping plane
 gluPerspective(45, (display[0] / display[1]), 0.5, 50)
 glTranslatef(0.0, 0.0, -5)
 glShadeModel(GL_SMOOTH)
