@@ -24,7 +24,7 @@ def configureEnvironment():
     #Initialize Dear PyGUI
     dpg.create_context()
     initializeTerrainControls()
-    dpg.create_viewport(title = "TERRAIN CONTROLS", width = 400, height = 500)
+    dpg.create_viewport(title = "TERRAIN CONTROLS", width = 400, height = 520)
     dpg.setup_dearpygui()
     dpg.show_viewport()
 
@@ -33,16 +33,37 @@ def cleanupEnvironment():
     pygame.quit()
 
 def initializeTerrainControls():
-    with dpg.window(label = "Terrain Parameters", width = 400, height = 500):
-        dpg.add_slider_float(label = "Height Scale",
-                             default_value = 1.0, 
+    with dpg.window(label = "Terrain Parameters", width = 400, height = 300, pos = (0,0),
+                    no_close = True, no_collapse = True, no_move = True):
+        dpg.add_input_int(label = "Base Seed",
+                             default_value = config.HEIGHTMAP_BASE_SEED,
+                             tag = "seed_input")
+        dpg.add_slider_int(label = "Octave Count",
+                             default_value = config.HEIGHTMAP_OCTAVES, 
+                             min_value = 3, 
+                             max_value = 15, 
+                             tag = "octave")
+        dpg.add_slider_float(label = "Octave Persistence",
+                             default_value = config.HEIGHTMAP_PERSISTENCE, 
+                             min_value = 0.1, 
+                             max_value = 2.0, 
+                             tag = "persistence")
+        dpg.add_slider_float(label = "Octave Lacunarity",
+                             default_value = config.HEIGHTMAP_LACUNARITY, 
                              min_value = 0.1, 
                              max_value = 5.0, 
-                             tag = "height_scale")
-        # Stats display
-        dpg.add_text("Terrain Stats:")
-        dpg.add_text(f"Triangles: {config.STATS_TRIANGLE_COUNT}", tag="tri_count")
-        dpg.add_text(f"Iterations: {config.STATS_ITER_COUNT}", tag="iter_count")
+                             tag = "lacunarity")
+        
+        dpg.add_button(label = "REGNERATE", callback = regenerateTerrain)
+
+    with dpg.window(label = "Terrain Stats", width = 400, height = 200, pos = (0, 310),
+                    no_close = True, no_collapse = True, no_move = True):
+        dpg.add_text(f"Triangles: {config.STATS_TRIANGLE_COUNT}", tag="tri_count1")
+        dpg.add_text(f"Iterations: {config.STATS_ITER_COUNT}", tag="iter_count1")
+
+def regenerateTerrain():
+    print("press")
+    pass
 
 def printTerrainLogger():
     print("****** TERRAIN OUTPUT LOGGER ******")
@@ -69,7 +90,7 @@ def main():
             if event.type == QUIT:
                 running = False
 
-        delta_time = clock.tick(60) / 1000
+        delta_time = clock.tick(30) / 1000
         angle += 20 * delta_time
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
