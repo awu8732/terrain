@@ -1,33 +1,39 @@
-import pygame
-from pygame.locals import *
+import dearpygui.dearpygui as dpg
 from OpenGL.GL import * 
 from OpenGL.GLU import *
+import pygame
+from pygame.locals import *
 import random as rand
-from mesh_generation import *
+
 import config
-import dearpygui.dearpygui as dpg
+from mesh_generation import *
 
 def configureEnvironment():
     pygame.init()
     display = (config.WINDOW_WIDTH, config.WINDOW_HEIGHT)
+    
     pygame.display.set_mode(display, DOUBLEBUF | OPENGL)
+    config.HEIGHTMAP_BASE_SEED = rand.randint(1, 500)
 
+    #Initialize OpenGL
     gluPerspective(config.WINDOW_FOV, display[0] / display[1],
                     config.WINDOW_CLIPPING_NEAR, config.WINDOW_CLIPPING_FAR)
     glTranslatef(-50, -10, -100)
     glEnable(GL_DEPTH_TEST)
 
-    config.HEIGHTMAP_BASE_SEED = rand.randint(1, 500)
-
     #Initialize Dear PyGUI
     dpg.create_context()
     initializeTerrainControls()
-    dpg.create_viewport(title = "TERRAIN CONTROLS", width = 400, height = 600)
+    dpg.create_viewport(title = "TERRAIN CONTROLS", width = 400, height = 500)
     dpg.setup_dearpygui()
     dpg.show_viewport()
 
+def cleanupEnvironment():
+    dpg.destroy_context()
+    pygame.quit()
+
 def initializeTerrainControls():
-    with dpg.window(label = "Terrain Parameters", width = 400, height = 600):
+    with dpg.window(label = "Terrain Parameters", width = 400, height = 500):
         dpg.add_slider_float(label = "Height Scale",
                              default_value = 1.0, 
                              min_value = 0.1, 
@@ -75,8 +81,7 @@ def main():
 
         pygame.display.flip()
 
-    dpg.destroy_context()
-    pygame.quit()
+    cleanupEnvironment()
 
 if __name__ == "__main__":
     main()
