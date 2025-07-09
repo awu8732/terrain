@@ -48,6 +48,12 @@ def initializeTerrainControls():
                              default_value = config.HEIGHTMAP_BASE_SEED,
                              tag = "seed_input",
                              callback = updateTerrainParameters)
+        dpg.add_slider_int(label = "Amplitude",
+                             default_value = config.HEIGHTMAP_SCALE, 
+                             min_value = 1, 
+                             max_value = 20, 
+                             tag = "scale",
+                             callback = updateTerrainParameters)
         dpg.add_slider_int(label = "Octave Count",
                              default_value = config.HEIGHTMAP_OCTAVES, 
                              min_value = 3, 
@@ -76,6 +82,7 @@ def initializeTerrainControls():
 
 def regenerateTerrain():
     config.HEIGHTMAP_BASE_SEED = dpg.get_value("seed_input")
+    config.HEIGHTMAP_SCALE = dpg.get_value("scale")
     config.HEIGHTMAP_OCTAVES = dpg.get_value("octave")
     config.HEIGHTMAP_PERSISTENCE = dpg.get_value("persistence")
     config.HEIGHTMAP_LACUNARITY = dpg.get_value("lacunarity")
@@ -95,6 +102,7 @@ def requestTerrainRegeneration():
 def updateTerrainParameters(sender, app_data):
     param_map = {
         "seed_input": "HEIGHTMAP_BASE_SEED",
+        "scale": "HEIGHTMAP_SCALE",
         "octave": "HEIGHTMAP_OCTAVES",
         "persistence": "HEIGHTMAP_PERSISTENCE",
         "lacunarity": "HEIGHTMAP_LACUNARITY"

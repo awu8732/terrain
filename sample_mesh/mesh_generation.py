@@ -5,15 +5,13 @@ from noise import pnoise2
 import numpy as np
 import config
 
-def generateHeightmap(width, depth, 
-                      scale = config.HEIGHTMAP_SCALE):
+def generateHeightmap(width, depth):
     heights = np.zeros((width, depth))
     for x in range(width):
         for z in range(depth):
-            nx = x / width * scale
-            nz = z / depth * scale
-            heights[x][z] = pnoise2(nx, 
-                                    nz, 
+            nx = x / width * config.HEIGHTMAP_SCALE
+            nz = z / depth * config.HEIGHTMAP_SCALE
+            heights[x][z] = pnoise2(nx, nz, 
                                     octaves = config.HEIGHTMAP_OCTAVES, 
                                     persistence = config.HEIGHTMAP_PERSISTENCE,
                                     lacunarity = config.HEIGHTMAP_LACUNARITY, 
@@ -21,8 +19,7 @@ def generateHeightmap(width, depth,
             config.STATS_ITER_COUNT += 1
     return heights
 
-def generateMesh(heightmap, 
-                 scale = config.HEIGHTMAP_SCALE):
+def generateMesh(heightmap):
     vertices = []
     indices = []
     width, depth = heightmap.shape
@@ -30,7 +27,7 @@ def generateMesh(heightmap,
     #generate vertice list
     for x in range(width):
         for z in range(depth):
-            y = heightmap[x][z] * scale
+            y = heightmap[x][z] * config.HEIGHTMAP_SCALE
             vertices.append((x,y,z))
 
             config.STATS_ITER_COUNT += 1
