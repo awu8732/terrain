@@ -1,4 +1,5 @@
 import dearpygui.dearpygui as dpg
+import logging
 from OpenGL.GL import * 
 from OpenGL.GLU import *
 import pygame
@@ -8,6 +9,13 @@ import random as rand
 import config
 from mesh_generation import *
 
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(message)s",
+    handlers=[logging.StreamHandler()]  # Send to terminal
+)
+logger = logging.getLogger("TERRAIN")
+
 def configureEnvironment():
     pygame.init()
     display = (config.WINDOW_WIDTH, config.WINDOW_HEIGHT)
@@ -15,24 +23,25 @@ def configureEnvironment():
     pygame.display.set_mode(display, DOUBLEBUF | OPENGL)
     config.HEIGHTMAP_BASE_SEED = rand.randint(1, 500)
 
-    #Initialize OpenGL
+    #Initialize OpenGL and DearPy
     gluPerspective(config.WINDOW_FOV, display[0] / display[1],
                     config.WINDOW_CLIPPING_NEAR, config.WINDOW_CLIPPING_FAR)
     glTranslatef(-50, -10, -100)
     glEnable(GL_DEPTH_TEST)
 
-    #Initialize Dear PyGUI
     dpg.create_context()
     initializeTerrainControls()
     dpg.create_viewport(title = "TERRAIN CONTROLS", width = 400, height = 520)
     dpg.setup_dearpygui()
     dpg.show_viewport()
+    logger.info("Environment configuration complete")
 
 def cleanupEnvironment():
     dpg.destroy_context()
     pygame.quit()
 
 def initializeTerrainControls():
+    logger.info("Initializing terrain control panels..")
     with dpg.window(label = "Terrain Parameters", width = 400, height = 300, pos = (0,0),
                     no_close = True, no_collapse = True, no_move = True):
         dpg.add_input_int(label = "Base Seed",
@@ -82,8 +91,7 @@ def regenerateTerrain():
 def requestTerrainRegeneration():
     if config.TERRAIN_NEEDS_UPDATE:
         config.TERRAIN_REGEN_REQ = True
-        print("request yes")
-
+    
 def printTerrainLogger():
     print("****** TERRAIN OUTPUT LOGGER ******")
     print(f"SEED_BASE: {config.HEIGHTMAP_BASE_SEED}")
@@ -99,7 +107,7 @@ def updateTerrainParameters(sender, app_data):
     }
     if sender in param_map:
         setattr(config, param_map[sender], app_data)
-        config.TERRRAIN_NEEDS_UPDATE = True
+        config.TERRAIN_NEEDS_UPDATE = True
         updateStatsDisplay()
 
 def updateStatsDisplay():
@@ -122,9 +130,9 @@ def main():
         if config.TERRAIN_NEEDS_UPDATE and config.TERRAIN_REGEN_REQ:
             try:
                 vertices, indices = regenerateTerrain()
-                print("Regeneration successful.")
+                logger.info("Regeneration successful")
             except Exception as e:
-                print(f"Regeneration failed: {e}")
+                logger.error(f"Regeneration failed: {e}")
             finally:
                 config.TERRAIN_NEEDS_UPDATE = False
                 config.TERRAIN_REGEN_REQ = False
