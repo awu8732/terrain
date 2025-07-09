@@ -41,7 +41,7 @@ def cleanupEnvironment():
     pygame.quit()
 
 def initializeTerrainControls():
-    logger.info("Initializing terrain control panels..")
+    logger.info("Initializing terrain control panel..")
     with dpg.window(label = "Terrain Parameters", width = 400, height = 300, pos = (0,0),
                     no_close = True, no_collapse = True, no_move = True):
         dpg.add_input_int(label = "Base Seed",
@@ -91,12 +91,6 @@ def regenerateTerrain():
 def requestTerrainRegeneration():
     if config.TERRAIN_NEEDS_UPDATE:
         config.TERRAIN_REGEN_REQ = True
-    
-def printTerrainLogger():
-    print("****** TERRAIN OUTPUT LOGGER ******")
-    print(f"SEED_BASE: {config.HEIGHTMAP_BASE_SEED}")
-    print(f"ITER_COUNT: {config.STATS_ITER_COUNT}")
-    print(f"TRIANGLE_COUNT: {config.STATS_TRIANGLE_COUNT}")
 
 def updateTerrainParameters(sender, app_data):
     param_map = {
@@ -120,7 +114,6 @@ def main():
 
     clock = pygame.time.Clock()
     running = True
-    printTerrainLogger()
     while running:
         dpg.render_dearpygui_frame()
         for event in pygame.event.get():

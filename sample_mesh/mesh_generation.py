@@ -6,10 +6,7 @@ import numpy as np
 import config
 
 def generateHeightmap(width, depth, 
-                      scale = config.HEIGHTMAP_SCALE,
-                      octaves = config.HEIGHTMAP_OCTAVES, 
-                      persistence = config.HEIGHTMAP_PERSISTENCE,
-                      lacunarity = config.HEIGHTMAP_LACUNARITY):
+                      scale = config.HEIGHTMAP_SCALE):
     heights = np.zeros((width, depth))
     for x in range(width):
         for z in range(depth):
@@ -17,10 +14,10 @@ def generateHeightmap(width, depth,
             nz = z / depth * scale
             heights[x][z] = pnoise2(nx, 
                                     nz, 
-                                    octaves = octaves, 
-                                    persistence = persistence,
-                                    lacunarity = lacunarity, 
-                                    base = 10)
+                                    octaves = config.HEIGHTMAP_OCTAVES, 
+                                    persistence = config.HEIGHTMAP_PERSISTENCE,
+                                    lacunarity = config.HEIGHTMAP_LACUNARITY, 
+                                    base = config.HEIGHTMAP_BASE_SEED)
             config.STATS_ITER_COUNT += 1
     return heights
 
