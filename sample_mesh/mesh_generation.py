@@ -5,12 +5,12 @@ from noise import pnoise2
 import numpy as np
 import config
 
-def generateHeightmap(width, depth):
-    heights = np.zeros((width, depth))
-    for x in range(width):
-        for z in range(depth):
-            nx = x / width * config.HEIGHTMAP_SCALE
-            nz = z / depth * config.HEIGHTMAP_SCALE
+def generateHeightmap():
+    heights = np.zeros((config.HEIGHTMAP_WIDTH, config.HEIGHTMAP_DEPTH))
+    for x in range(config.HEIGHTMAP_WIDTH):
+        for z in range(config.HEIGHTMAP_DEPTH):
+            nx = x / config.HEIGHTMAP_WIDTH * config.HEIGHTMAP_SCALE
+            nz = z / config.HEIGHTMAP_DEPTH * config.HEIGHTMAP_SCALE
             heights[x][z] = pnoise2(nx, nz, 
                                     octaves = config.HEIGHTMAP_OCTAVES, 
                                     persistence = config.HEIGHTMAP_PERSISTENCE,

@@ -24,10 +24,15 @@ def configureEnvironment():
     config.HEIGHTMAP_BASE_SEED = rand.randint(1, 500)
 
     #Initialize OpenGL and DearPy
-    gluPerspective(config.WINDOW_FOV, display[0] / display[1],
-                    config.WINDOW_CLIPPING_NEAR, config.WINDOW_CLIPPING_FAR)
-    glTranslatef(-50, -10, -100)
+    glMatrixMode(GL_PROJECTION)
+    glLoadIdentity()
+    gluPerspective(config.WINDOW_FOV, display[0]/display[1],
+                  config.WINDOW_CLIPPING_NEAR, config.WINDOW_CLIPPING_FAR)
+    glMatrixMode(GL_MODELVIEW)
+
     glEnable(GL_DEPTH_TEST)
+    glShadeModel(GL_SMOOTH)
+    glEnable(GL_CULL_FACE)
 
     dpg.create_context()
     initializeTerrainControls()
@@ -47,6 +52,12 @@ def initializeTerrainControls():
         dpg.add_input_int(label = "Base Seed",
                              default_value = config.HEIGHTMAP_BASE_SEED,
                              tag = "seed_input",
+                             callback = updateTerrainParameters)
+        dpg.add_slider_int(label = "Resolution",
+                             default_value = config.HEIGHTMAP_WIDTH, 
+                             min_value = 50, 
+                             max_value = 200, 
+                             tag = "resolution",
                              callback = updateTerrainParameters)
         dpg.add_slider_float(label = "Height Scale",
                              default_value = config.HEIGHTMAP_SCALE, 
@@ -96,6 +107,8 @@ def terrainParamsToLogger(onStart = False):
 
 def regenerateTerrain():
     config.HEIGHTMAP_BASE_SEED = dpg.get_value("seed_input")
+    config.HEIGHTMAP_WIDTH = dpg.get_value("resolution")
+    config.HEIGHTMAP_DEPTH = dpg.get_value("resolution")
     config.HEIGHTMAP_SCALE = dpg.get_value("scale")
     config.HEIGHTMAP_OCTAVES = dpg.get_value("octaves")
     config.HEIGHTMAP_PERSISTENCE = dpg.get_value("persistence")
@@ -103,10 +116,14 @@ def regenerateTerrain():
     config.STATS_TRIANGLE_COUNT = 0
     config.STATS_ITER_COUNT = 0
     
-    heightmap = generateHeightmap(config.HEIGHTMAP_WIDTH, config.HEIGHTMAP_DEPTH)
+    heightmap = generateHeightmap()
     vertices, indices = generateMesh(heightmap)
-
     updateStatsDisplay()
+
+    #reset opengl view
+    glMatrixMode(GL_MODELVIEW)
+    glLoadIdentity()
+    glTranslatef(-1 * config.HEIGHTMAP_WIDTH / 2, -10, -1 * config.HEIGHTMAP_DEPTH)
     return vertices, indices
 
 def requestTerrainRegeneration():
@@ -116,6 +133,8 @@ def requestTerrainRegeneration():
 def updateTerrainParameters(sender, app_data):
     param_map = {
         "seed_input": "HEIGHTMAP_BASE_SEED",
+        "resolution": "HEIGHTMAP_WIDTH",
+        "resolution": "HEIGHTMAP_DEPTH",
         "scale": "HEIGHTMAP_SCALE",
         "octave": "HEIGHTMAP_OCTAVES",
         "persistence": "HEIGHTMAP_PERSISTENCE",
