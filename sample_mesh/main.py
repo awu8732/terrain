@@ -48,28 +48,28 @@ def initializeTerrainControls():
                              default_value = config.HEIGHTMAP_BASE_SEED,
                              tag = "seed_input",
                              callback = updateTerrainParameters)
-        dpg.add_slider_int(label = "Amplitude",
+        dpg.add_slider_float(label = "Height Scale",
                              default_value = config.HEIGHTMAP_SCALE, 
-                             min_value = 1, 
-                             max_value = 20, 
+                             min_value = 0.1, 
+                             max_value = 30.0, 
                              tag = "scale",
                              callback = updateTerrainParameters)
-        dpg.add_slider_int(label = "Octave Count",
+        dpg.add_slider_int(label = "Octaves",
                              default_value = config.HEIGHTMAP_OCTAVES, 
-                             min_value = 3, 
-                             max_value = 15, 
-                             tag = "octave",
+                             min_value = 1, 
+                             max_value = 20, 
+                             tag = "octaves",
                              callback = updateTerrainParameters)
-        dpg.add_slider_float(label = "Octave Persistence",
+        dpg.add_slider_float(label = "Persistence",
                              default_value = config.HEIGHTMAP_PERSISTENCE, 
                              min_value = 0.1, 
-                             max_value = 2.0, 
+                             max_value = 1.0, 
                              tag = "persistence",
                              callback = updateTerrainParameters)
-        dpg.add_slider_float(label = "Octave Lacunarity",
+        dpg.add_slider_float(label = "Lacunarity",
                              default_value = config.HEIGHTMAP_LACUNARITY, 
-                             min_value = 0.1, 
-                             max_value = 5.0, 
+                             min_value = 1.0, 
+                             max_value = 4.0, 
                              tag = "lacunarity",
                              callback = updateTerrainParameters)
         
@@ -80,10 +80,24 @@ def initializeTerrainControls():
         dpg.add_text(f"Triangles: {config.STATS_TRIANGLE_COUNT}", tag="tri_count")
         dpg.add_text(f"Iterations: {config.STATS_ITER_COUNT}", tag="iter_count")
 
+def terrainParamsToLogger(onStart = False):
+    message = "Regeneration successful"
+    if onStart:
+        message = "Initial terrain"
+    logger.info(
+        f"\033[0m{message}: \033[0m | "
+        f"\033[36mSeed\033[0m: {config.HEIGHTMAP_BASE_SEED} | "
+        f"\033[36mRes\033[0m: {config.HEIGHTMAP_WIDTH}x{config.HEIGHTMAP_DEPTH}|\n"
+        f"    \033[33mScale\033[0m={round(config.HEIGHTMAP_SCALE, 2)} "
+        f"\033[33mOctaves\033[0m={config.HEIGHTMAP_OCTAVES} "
+        f"\033[33mPersist\033[0m={round(config.HEIGHTMAP_PERSISTENCE, 3)} "
+        f"\033[33mLacun\033[0m={round(config.HEIGHTMAP_LACUNARITY, 3)}"
+    )
+
 def regenerateTerrain():
     config.HEIGHTMAP_BASE_SEED = dpg.get_value("seed_input")
     config.HEIGHTMAP_SCALE = dpg.get_value("scale")
-    config.HEIGHTMAP_OCTAVES = dpg.get_value("octave")
+    config.HEIGHTMAP_OCTAVES = dpg.get_value("octaves")
     config.HEIGHTMAP_PERSISTENCE = dpg.get_value("persistence")
     config.HEIGHTMAP_LACUNARITY = dpg.get_value("lacunarity")
     config.STATS_TRIANGLE_COUNT = 0
@@ -119,6 +133,7 @@ def updateStatsDisplay():
 def main():
     configureEnvironment()
     vertices, indices = regenerateTerrain()
+    terrainParamsToLogger(True)
 
     clock = pygame.time.Clock()
     running = True
@@ -131,7 +146,7 @@ def main():
         if config.TERRAIN_NEEDS_UPDATE and config.TERRAIN_REGEN_REQ:
             try:
                 vertices, indices = regenerateTerrain()
-                logger.info("Regeneration successful")
+                terrainParamsToLogger()
             except Exception as e:
                 logger.error(f"Regeneration failed: {e}")
             finally:
