@@ -8,7 +8,6 @@ import random as rand
 import time
 
 import config
-from core.performance import PerformanceTimer
 from mesh_generation import *
 
 logging.basicConfig(
