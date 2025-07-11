@@ -5,8 +5,10 @@ from OpenGL.GLU import *
 import pygame
 from pygame.locals import *
 import random as rand
+import time
 
 import config
+from core.performance import PerformanceTimer
 from mesh_generation import *
 
 logging.basicConfig(
@@ -15,6 +17,7 @@ logging.basicConfig(
     handlers=[logging.StreamHandler()]  # Send to terminal
 )
 logger = logging.getLogger("TERRAIN")
+perf_timer = PerformanceTimer()
 
 def configureEnvironment():
     pygame.init()
@@ -47,7 +50,7 @@ def cleanupEnvironment():
 
 def initializeTerrainControls():
     logger.info("Initializing terrain control panel..")
-    with dpg.window(label = "Terrain Parameters", width = 400, height = 300, pos = (0,0),
+    with dpg.window(label = "Terrain Parameters", width = 400, height = 200, pos = (0,0),
                     no_close = True, no_collapse = True, no_move = True):
         dpg.add_input_int(label = "Base Seed",
                              default_value = config.HEIGHTMAP_BASE_SEED,
@@ -86,11 +89,17 @@ def initializeTerrainControls():
         
         dpg.add_button(label = "REGNERATE", callback = requestTerrainRegeneration)
 
-    with dpg.window(label = "Terrain Stats", width = 400, height = 200, pos = (0, 310),
+    with dpg.window(label = "Terrain Stats", width = 400, height = 300, pos = (0, 210),
                     no_close = True, no_collapse = True, no_move = True):
-        dpg.add_text(f"Triangles: {config.STATS_TRIANGLE_COUNT}", tag="tri_count")
-        #dpg.add_text(f"Vertices: {config.STATS.}")
-        dpg.add_text(f"Iterations: {config.STATS_ITER_COUNT}", tag="iter_count")
+        dpg.add_text(f"Triangles: {config.STATS.TRIANGLE_COUNT}", tag="tri_count")
+        dpg.add_text(f"Vertices: {config.STATS.VERTEX_COUNT}", tag="vert_count")
+        #dpg.add_text(f"Iterations: {config.STATS.ITER_COUNT}", tag="iter_count")
+
+        dpg.add_text(f"Generation Time: {config.STATS.GEN_TIME}", tag="gen_time")
+        dpg.add_text(f"Rendering Time: {config.STATS.RENDER_TIME}", tag="render_time")
+
+        dpg.add_text(f"Frame Time: {config.STATS.FRAME_TIME}", tag="frame_time")
+        dpg.add_text(f"FPS: {config.STATS.FPS}", tag="fps")
 
 def terrainParamsToLogger(onStart = False):
     message = "Regeneration successful"
@@ -106,19 +115,12 @@ def terrainParamsToLogger(onStart = False):
         f"\033[33mLacun\033[0m={round(config.HEIGHTMAP_LACUNARITY, 3)}"
     )
 
-def regenerateTerrain():
-    config.HEIGHTMAP_BASE_SEED = dpg.get_value("seed_input")
-    config.HEIGHTMAP_WIDTH = dpg.get_value("resolution")
-    config.HEIGHTMAP_DEPTH = dpg.get_value("resolution")
-    config.HEIGHTMAP_SCALE = dpg.get_value("scale")
-    config.HEIGHTMAP_OCTAVES = dpg.get_value("octaves")
-    config.HEIGHTMAP_PERSISTENCE = dpg.get_value("persistence")
-    config.HEIGHTMAP_LACUNARITY = dpg.get_value("lacunarity")
-    config.STATS_TRIANGLE_COUNT = 0
-    config.STATS_ITER_COUNT = 0
-    
+def regenerateTerrain():   
+    perf_timer.start() 
     heightmap = generateHeightmap()
     vertices, indices = generateMesh(heightmap)
+    config.STATS.VERTEX_COUNT = len(vertices)
+    config.STATS.TRIANGLE_COUNT = len(indices) // 3
     updateStatsDisplay()
 
     #reset opengl view
@@ -147,17 +149,25 @@ def updateTerrainParameters(sender, app_data):
         updateStatsDisplay()
 
 def updateStatsDisplay():
-    dpg.set_value("tri_count", f"Triangles: {config.STATS_TRIANGLE_COUNT}")
-    dpg.set_value("iter_count", f"Iterations: {config.STATS_ITER_COUNT}")
+    # Performance Metrics
+    dpg.set_value("frame_time", f"Frame Time: {config.STATS.FRAME_TIME:.1f}ms")
+    dpg.set_value("fps", f"FPS: {config.STATS.FPS:.0f}")
+    dpg.set_value("gen_time", f"Generation Time: {config.STATS.GEN_TIME:.1f}ms")
+    dpg.set_value("render_time", f"Rendering Time: {config.STATS.RENDER_TIME:.1f}ms")
+    # Mesh Stats
+    dpg.set_value("tri_count", f"Triangles: {config.STATS.TRIANGLE_COUNT:,}")
+    dpg.set_value("vert_count", f"Vertices: {config.STATS.VERTEX_COUNT:,}")
 
 def main():
     configureEnvironment()
     vertices, indices = regenerateTerrain()
     terrainParamsToLogger(True)
 
-    clock = pygame.time.Clock()
     running = True
+    frame_times = []
     while running:
+        frame_start = time.perf_counter()
+
         dpg.render_dearpygui_frame()
         for event in pygame.event.get():
             if event.type == QUIT:
@@ -174,9 +184,20 @@ def main():
                 config.TERRAIN_REGEN_REQ = False
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+        render_start = time.perf_counter()
         glPushMatrix()
         renderTerrain(vertices, indices)
         glPopMatrix()
+        config.STATS.RENDER_TIME = (time.perf_counter() - render_start) * 1000
+
+        #frame timing
+        config.STATS.FRAME_TIME = (time.perf_counter() - frame_start) * 1000
+        frame_times.append(config.STATS.FRAME_TIME)
+        if len(frame_times) > 60:
+            frame_times.pop(0)
+        config.STATS.FPS = 1000 / (sum(frame_times) / len(frame_times))
+
+        updateStatsDisplay()
         pygame.display.flip()
 
     cleanupEnvironment()

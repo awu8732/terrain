@@ -13,13 +13,12 @@ HEIGHTMAP_PERSISTENCE = 0.5
 HEIGHTMAP_LACUNARITY = 2.0
 
 # TRACKERS
-STATS_ITER_COUNT = 0
-STATS_TRIANGLE_COUNT = 0
 TERRAIN_NEEDS_UPDATE = False
 TERRAIN_REGEN_REQ = False
 
 class STATS:
     TRIANGLE_COUNT = 0
+    VERTEX_COUNT = 0
     ITER_COUNT = 0
     GEN_TIME = 0.0          # terrain generation time (ms)
     RENDER_TIME = 0.0       # gpu rendering time (ms)

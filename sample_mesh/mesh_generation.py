@@ -16,7 +16,6 @@ def generateHeightmap():
                                     persistence = config.HEIGHTMAP_PERSISTENCE,
                                     lacunarity = config.HEIGHTMAP_LACUNARITY, 
                                     base = config.HEIGHTMAP_BASE_SEED)
-            config.STATS_ITER_COUNT += 1
     return heights
 
 def generateMesh(heightmap):
@@ -30,8 +29,6 @@ def generateMesh(heightmap):
             y = heightmap[x][z] * config.HEIGHTMAP_SCALE
             vertices.append((x,y,z))
 
-            config.STATS_ITER_COUNT += 1
-
     #assign generic triangle indices
     for x in range(width - 1):
         for z in range(depth - 1):
@@ -43,9 +40,6 @@ def generateMesh(heightmap):
             indices.append((top_left, bottom_left, top_right))
             indices.append((top_right, bottom_left, bottom_right))
 
-            config.STATS_ITER_COUNT += 1
-            config.STATS_TRIANGLE_COUNT += 1
-
     return vertices, indices
 
 def renderTerrain(vertices, indices):
@@ -55,5 +49,4 @@ def renderTerrain(vertices, indices):
             vertex = vertices[index]
             glColor3f(0.3, 0.8 - vertex[1] * 0.1, 0.3)
             glVertex3fv(vertex)
-            config.STATS_ITER_COUNT += 1
     glEnd()
