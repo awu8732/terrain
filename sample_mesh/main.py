@@ -89,6 +89,7 @@ def initializeTerrainControls():
     with dpg.window(label = "Terrain Stats", width = 400, height = 200, pos = (0, 310),
                     no_close = True, no_collapse = True, no_move = True):
         dpg.add_text(f"Triangles: {config.STATS_TRIANGLE_COUNT}", tag="tri_count")
+        #dpg.add_text(f"Vertices: {config.STATS.}")
         dpg.add_text(f"Iterations: {config.STATS_ITER_COUNT}", tag="iter_count")
 
 def terrainParamsToLogger(onStart = False):
