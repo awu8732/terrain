@@ -17,7 +17,6 @@ logging.basicConfig(
     handlers=[logging.StreamHandler()]  # Send to terminal
 )
 logger = logging.getLogger("TERRAIN")
-perf_timer = PerformanceTimer()
 
 def configureEnvironment():
     pygame.init()
@@ -116,11 +115,12 @@ def terrainParamsToLogger(onStart = False):
     )
 
 def regenerateTerrain():   
-    perf_timer.start() 
+    gen_start = time.perf_counter()
     heightmap = generateHeightmap()
     vertices, indices = generateMesh(heightmap)
     config.STATS.VERTEX_COUNT = len(vertices)
     config.STATS.TRIANGLE_COUNT = len(indices) // 3
+    config.STATS.GEN_TIME = (time.perf_counter() - gen_start) * 1000
     updateStatsDisplay()
 
     #reset opengl view
@@ -146,7 +146,6 @@ def updateTerrainParameters(sender, app_data):
     if sender in param_map:
         setattr(config, param_map[sender], app_data)
         config.TERRAIN_NEEDS_UPDATE = True
-        updateStatsDisplay()
 
 def updateStatsDisplay():
     # Performance Metrics
@@ -188,10 +187,11 @@ def main():
         glPushMatrix()
         renderTerrain(vertices, indices)
         glPopMatrix()
+        
+        #stats timing
         config.STATS.RENDER_TIME = (time.perf_counter() - render_start) * 1000
-
-        #frame timing
         config.STATS.FRAME_TIME = (time.perf_counter() - frame_start) * 1000
+
         frame_times.append(config.STATS.FRAME_TIME)
         if len(frame_times) > 60:
             frame_times.pop(0)
