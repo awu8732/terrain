@@ -1,9 +1,12 @@
+import time
+import numpy as np
+from noise import pnoise2
 from pygame.locals import *
 from OpenGL.GL import * 
 from OpenGL.GLU import *
-from noise import pnoise2
-import numpy as np
-import config
+
+import configuration as config
+import utility
 
 def generateHeightmap():
     heights = np.zeros((config.HEIGHTMAP_WIDTH, config.HEIGHTMAP_DEPTH))
@@ -40,6 +43,21 @@ def generateMesh(heightmap):
             indices.append((top_left, bottom_left, top_right))
             indices.append((top_right, bottom_left, bottom_right))
 
+    return vertices, indices
+
+def regenerateTerrain():   
+    gen_start = time.perf_counter()
+    heightmap = generateHeightmap()
+    vertices, indices = generateMesh(heightmap)
+    config.STATS.VERTEX_COUNT = len(vertices)
+    config.STATS.TRIANGLE_COUNT = len(indices) // 3
+    config.STATS.GEN_TIME = (time.perf_counter() - gen_start) * 1000
+    utility.updateStatsDisplay()
+
+    #reset opengl view
+    glMatrixMode(GL_MODELVIEW)
+    glLoadIdentity()
+    glTranslatef(-1 * config.HEIGHTMAP_WIDTH / 2, -10, -1 * config.HEIGHTMAP_DEPTH)
     return vertices, indices
 
 def renderTerrain(vertices, indices):
