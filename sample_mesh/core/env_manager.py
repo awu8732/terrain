@@ -7,7 +7,7 @@ from OpenGL.GL import *
 from OpenGL.GLU import *
 
 import configuration as config
-import ui_manager as ui
+import core.ui_manager as ui
 
 logger = logging.getLogger("TERRAIN")
 

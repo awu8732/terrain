@@ -6,10 +6,10 @@ import dearpygui.dearpygui as dpg
 from OpenGL.GL import * 
 from OpenGL.GLU import *
 
+import configuration as config
+import core.env_manager as env
 from mesh_generation import *
 from utility import *
-import configuration as config
-import env_manager as env
 
 logging.basicConfig(
     level=logging.INFO,
