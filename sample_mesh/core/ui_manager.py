@@ -49,7 +49,6 @@ def initializeTerrainControls():
                     no_close = True, no_collapse = True, no_move = True):
         dpg.add_text(f"Triangles: {config.STATS.TRIANGLE_COUNT}", tag="tri_count")
         dpg.add_text(f"Vertices: {config.STATS.VERTEX_COUNT}", tag="vert_count")
-        #dpg.add_text(f"Iterations: {config.STATS.ITER_COUNT}", tag="iter_count")
 
         dpg.add_text(f"Generation Time: {config.STATS.GEN_TIME}", tag="gen_time")
         dpg.add_text(f"Rendering Time: {config.STATS.RENDER_TIME}", tag="render_time")
@@ -64,7 +63,6 @@ def requestTerrainRegeneration():
 def updateTerrainParameters(sender, app_data):
     param_map = {
         "seed_input": "HEIGHTMAP_BASE_SEED",
-        "resolution": "HEIGHTMAP_WIDTH",
         "resolution": "HEIGHTMAP_DEPTH",
         "scale": "HEIGHTMAP_SCALE",
         "octave": "HEIGHTMAP_OCTAVES",

@@ -57,7 +57,7 @@ def regenerateTerrain():
     #reset opengl view
     glMatrixMode(GL_MODELVIEW)
     glLoadIdentity()
-    glTranslatef(-1 * config.HEIGHTMAP_WIDTH / 2, -10, -1 * config.HEIGHTMAP_DEPTH)
+    glTranslatef(-1 * config.HEIGHTMAP_WIDTH / 2, -0.06 * config.HEIGHTMAP_DEPTH, -1 * config.HEIGHTMAP_DEPTH)
     return vertices, indices
 
 def renderTerrain(vertices, indices):
