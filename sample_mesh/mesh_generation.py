@@ -68,3 +68,14 @@ def renderTerrain(vertices, indices):
             glColor3f(0.3, 0.8 - vertex[1] * 0.1, 0.3)
             glVertex3fv(vertex)
     glEnd()
+
+def simulateHydraulicErosion(heightmap, iterations = 100000, erosion_radius = 3):
+    hmap = heightmap.copy()
+    width, height = hmap.shape
+
+    for _ in range(iterations):
+        x, y = np.random.randint(0, width), np.random.randint(0, height)
+
+        #put droplet properties here
+        for _ in range(30): # max droplet lifetime
+            pass

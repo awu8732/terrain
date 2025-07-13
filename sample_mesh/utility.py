@@ -4,6 +4,18 @@ import configuration as config
 
 logger = logging.getLogger("TERRAIN")
 
+# bilinear interpolatin for smooth gradients
+def calculateGradient(hmap, x, y, xi, yi):
+    xf, yf = x - xi, y - yi
+    h00 = hmap[xi, yi]
+    h10 = hmap[xi+1, yi]
+    h01 = hmap[xi, yi+1]
+    h11 = hmap[xi+1, yi+1]
+
+    dx = (h10 - h00) * (1 - yf) + (h11 - h01) * yf
+    dy = (h01 - h00) * (1 - xf) + (h11 - h10) * xf
+    return dx, dy
+
 def terrainParamsToLogger(onStart = False):
     message = "Regeneration successful"
     if onStart:
