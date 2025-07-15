@@ -5,12 +5,12 @@ import configuration as config
 logger = logging.getLogger("TERRAIN")
 
 # bilinear interpolatin for smooth gradients
-def calculateGradient(hmap, x, y, xi, yi):
-    xf, yf = x - xi, y - yi
-    h00 = hmap[xi, yi]
-    h10 = hmap[xi+1, yi]
-    h01 = hmap[xi, yi+1]
-    h11 = hmap[xi+1, yi+1]
+def calculateGradient(hmap, x, y, x_int, y_int):
+    xf, yf = x - x_int, y - y_int
+    h00 = hmap[x_int, y_int]
+    h10 = hmap[x_int+1, y_int]
+    h01 = hmap[x_int, y_int+1]
+    h11 = hmap[x_int+1, y_int+1]
 
     dx = (h10 - h00) * (1 - yf) + (h11 - h01) * yf
     dy = (h01 - h00) * (1 - xf) + (h11 - h10) * xf

@@ -26,6 +26,9 @@ def generateMesh(heightmap):
     indices = []
     width, depth = heightmap.shape
 
+    if config.SIMULATE_EROSION:
+        heightmap = simulateHydraulicErosion(heightmap)
+
     #generate vertice list
     for x in range(width):
         for z in range(depth):
@@ -69,13 +72,47 @@ def renderTerrain(vertices, indices):
             glVertex3fv(vertex)
     glEnd()
 
-def simulateHydraulicErosion(heightmap, iterations = 100000, erosion_radius = 3):
+def simulateHydraulicErosion(heightmap, iterations = 10000, erosion_radius = 3):
     hmap = heightmap.copy()
     width, height = hmap.shape
 
     for _ in range(iterations):
         x, y = np.random.randint(0, width), np.random.randint(0, height)
+        d_vel = 0.0
+        d_mass = 0.0
+        d_water = 1.0
 
         #put droplet properties here
-        for _ in range(30): # max droplet lifetime
-            pass
+        for _ in range(15): # max droplet lifetime
+            x_int, y_int = int(x), int(y)
+
+            #check bounds
+            if x_int < 0 or x_int >= width - 1 or y_int < 0 or y_int >= height - 1:
+                break
+            
+            dx, dy = utility.calculateGradient(hmap, x, y, x_int, y_int)
+            normal = max(1e-6, np.sqrt(dx * dx + dy * dy))
+
+            if dx == 0 and dy == 0:
+                break
+            x -= dx / normal
+            y -= dy / normal
+
+            # compute sediment capacity (higher velocity = more carrying capacity)
+            s_capacity = max(0, d_vel * d_water * (1 - abs(dx+dy)/2) * 0.1)
+
+            if d_mass > s_capacity or hmap[x_int, y_int] < 0:
+                deposit_amount = (d_mass - s_capacity) * 0.3
+                hmap[x_int, y_int] += deposit_amount
+                d_mass -= deposit_amount
+            else: 
+                erode_amount = min((s_capacity - d_mass) * 0.3, hmap[x_int, y_int] * 0.99)
+                hmap[x_int, y_int] -= erode_amount
+                d_mass += erode_amount
+
+            d_vel = max(0, d_vel + np.sqrt(dx * dx + dy * dy) - 0.1)
+            d_water *= 0.99
+    return hmap
+
+
+
