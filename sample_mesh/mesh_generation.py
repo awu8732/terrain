@@ -99,7 +99,8 @@ def simulateHydraulicErosion(heightmap, iterations = 10000, erosion_radius = 3):
             y -= dy / normal
 
             # compute sediment capacity (higher velocity = more carrying capacity)
-            s_capacity = max(0, d_vel * d_water * (1 - abs(dx+dy)/2) * 0.1)
+            slope = np.sqrt(dx * dx + dy * dy)
+            s_capacity = d_vel * d_water * slope * 0.1
 
             if d_mass > s_capacity or hmap[x_int, y_int] < 0:
                 deposit_amount = (d_mass - s_capacity) * 0.3
