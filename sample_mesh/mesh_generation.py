@@ -50,6 +50,9 @@ def generateMesh(heightmap):
 
 def regenerateTerrain():   
     gen_start = time.perf_counter()
+    config.STATS.TOTAL_D = 0.0
+    config.STATS.TOTAL_E = 0.0
+
     heightmap = generateHeightmap()
     vertices, indices = generateMesh(heightmap)
     config.STATS.VERTEX_COUNT = len(vertices)
@@ -72,7 +75,7 @@ def renderTerrain(vertices, indices):
             glVertex3fv(vertex)
     glEnd()
 
-def simulateHydraulicErosion(heightmap, iterations = 10000, erosion_radius = 3):
+def simulateHydraulicErosion(heightmap, iterations = 20000, erosion_radius = 3):
     hmap = heightmap.copy()
     width, height = hmap.shape
 
@@ -83,7 +86,7 @@ def simulateHydraulicErosion(heightmap, iterations = 10000, erosion_radius = 3):
         d_water = 1.0
 
         #put droplet properties here
-        for _ in range(15): # max droplet lifetime
+        for _ in range(30): # max droplet lifetime
             x_int, y_int = int(x), int(y)
             dx, dy = utility.calculateGradient(hmap, x, y, x_int, y_int, width, height)
             normal = max(1e-6, np.sqrt(dx * dx + dy * dy))
@@ -98,16 +101,20 @@ def simulateHydraulicErosion(heightmap, iterations = 10000, erosion_radius = 3):
             s_capacity = d_vel * d_water * slope * 0.1
 
             if d_mass > s_capacity or hmap[x_int, y_int] < 0:
-                deposit_amount = (d_mass - s_capacity) * 0.3
+                deposit_amount = max(0.0, (d_mass - s_capacity) * 0.3)
                 hmap[x_int, y_int] += deposit_amount
                 d_mass -= deposit_amount
+                config.STATS.TOTAL_D += deposit_amount
             else: 
                 erode_amount = min((s_capacity - d_mass) * 0.3, hmap[x_int, y_int] * 0.99)
                 hmap[x_int, y_int] -= erode_amount
                 d_mass += erode_amount
+                config.STATS.TOTAL_E += erode_amount
 
             d_vel = max(0, d_vel + np.sqrt(dx * dx + dy * dy) - 0.1)
-            d_water *= 0.98
+            d_water *= 0.99
+    print(f"TOTAL DEPOSITED: {config.STATS.TOTAL_D}")
+    print(f"TOTAL ERODED: {config.STATS.TOTAL_E}")
     return hmap
 
 

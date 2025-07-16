@@ -25,3 +25,5 @@ class STATS:
     RENDER_TIME = 0.0       # gpu rendering time (ms)
     FRAME_TIME = 0.0        # full frame time (ms)
     FPS = 0
+    TOTAL_D = 0.0
+    TOTAL_E = 0.0
