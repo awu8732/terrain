@@ -85,12 +85,7 @@ def simulateHydraulicErosion(heightmap, iterations = 10000, erosion_radius = 3):
         #put droplet properties here
         for _ in range(15): # max droplet lifetime
             x_int, y_int = int(x), int(y)
-
-            #check bounds
-            if x_int < 0 or x_int >= width - 1 or y_int < 0 or y_int >= height - 1:
-                break
-            
-            dx, dy = utility.calculateGradient(hmap, x, y, x_int, y_int)
+            dx, dy = utility.calculateGradient(hmap, x, y, x_int, y_int, width, height)
             normal = max(1e-6, np.sqrt(dx * dx + dy * dy))
 
             if dx == 0 and dy == 0:
@@ -112,7 +107,7 @@ def simulateHydraulicErosion(heightmap, iterations = 10000, erosion_radius = 3):
                 d_mass += erode_amount
 
             d_vel = max(0, d_vel + np.sqrt(dx * dx + dy * dy) - 0.1)
-            d_water *= 0.99
+            d_water *= 0.98
     return hmap
 
 
