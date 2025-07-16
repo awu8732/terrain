@@ -6,7 +6,7 @@ logger = logging.getLogger("TERRAIN")
 
 def initializeTerrainControls():
     logger.info("Initializing terrain control panel..")
-    with dpg.window(label = "Terrain Parameters", width = 400, height = 200, pos = (0,0),
+    with dpg.window(label = "Terrain Parameters", width = 400, height = 240, pos = (0,0),
                     no_close = True, no_collapse = True, no_move = True):
         dpg.add_input_int(label = "Base Seed",
                              default_value = config.HEIGHTMAP_BASE_SEED,
@@ -21,7 +21,7 @@ def initializeTerrainControls():
         dpg.add_slider_float(label = "Height Scale",
                              default_value = config.HEIGHTMAP_SCALE, 
                              min_value = 0.1, 
-                             max_value = 30.0, 
+                             max_value = 15.0, 
                              tag = "scale",
                              callback = updateTerrainParameters)
         dpg.add_slider_int(label = "Octaves",
@@ -42,10 +42,14 @@ def initializeTerrainControls():
                              max_value = 4.0, 
                              tag = "lacunarity",
                              callback = updateTerrainParameters)
+        dpg.add_checkbox(label="Enable Hydraulic Erosion",
+                     default_value=config.SIMULATE_EROSION,
+                     tag="hydraulic_erosion",
+                     callback=updateTerrainParameters)
         
         dpg.add_button(label = "REGNERATE", callback = requestTerrainRegeneration)
 
-    with dpg.window(label = "Terrain Stats", width = 400, height = 300, pos = (0, 210),
+    with dpg.window(label = "Terrain Stats", width = 400, height = 300, pos = (0, 250),
                     no_close = True, no_collapse = True, no_move = True):
         dpg.add_text(f"Triangles: {config.STATS.TRIANGLE_COUNT}", tag="tri_count")
         dpg.add_text(f"Vertices: {config.STATS.VERTEX_COUNT}", tag="vert_count")
@@ -65,9 +69,10 @@ def updateTerrainParameters(sender, app_data):
         "seed_input": "HEIGHTMAP_BASE_SEED",
         "resolution": "HEIGHTMAP_DEPTH",
         "scale": "HEIGHTMAP_SCALE",
-        "octave": "HEIGHTMAP_OCTAVES",
+        "octaves": "HEIGHTMAP_OCTAVES",
         "persistence": "HEIGHTMAP_PERSISTENCE",
-        "lacunarity": "HEIGHTMAP_LACUNARITY"
+        "lacunarity": "HEIGHTMAP_LACUNARITY",
+        "hydraulic_erosion": "SIMULATE_EROSION"
     }
     if sender in param_map:
         setattr(config, param_map[sender], app_data)
