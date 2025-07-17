@@ -30,7 +30,7 @@ def generateMesh(heightmap):
     utility.resetErosionStatistics()
 
     if config.SIMULATE_EROSION:
-        heightmap, config.STATS.TOTAL_D, config.STATS.TOTAL_E = simulateHydraulicErosion_accelerated(heightmap)
+        heightmap, config.STATS.TOTAL_D, config.STATS.TOTAL_E = simulateHydraulicErosion_accelerated(heightmap, config.EROSION_ITERATIONS)
         config.STATS.ERO_TIME = (time.perf_counter() - ero_start) * 1000
         utility.outputErosionStatistics()
 

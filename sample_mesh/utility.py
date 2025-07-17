@@ -46,7 +46,8 @@ def terrainParamsToLogger(onStart = False):
         f"\033[33mOctaves\033[0m={config.HEIGHTMAP_OCTAVES} "
         f"\033[33mPersist\033[0m={round(config.HEIGHTMAP_PERSISTENCE, 3)} "
         f"\033[33mLacun\033[0m={round(config.HEIGHTMAP_LACUNARITY, 3)} "
-        f"\033[35mEro\033[0m={'Y' if config.SIMULATE_EROSION else 'N'}"
+        f"\033[35mEro\033[0m={'Y' if config.SIMULATE_EROSION else 'N'} "
+        f"\033[35mIter\033[0m={config.EROSION_ITERATIONS} "
     )
 
 def updateStatsDisplay():

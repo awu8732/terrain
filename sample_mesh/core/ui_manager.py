@@ -46,6 +46,12 @@ def initializeTerrainControls():
                      default_value=config.SIMULATE_EROSION,
                      tag="hydraulic_erosion",
                      callback=updateTerrainParameters)
+        dpg.add_slider_int(label = "ITERATIONS",
+                             default_value = config.EROSION_ITERATIONS, 
+                             min_value = 10000, 
+                             max_value = 1e6, 
+                             tag = "iterations",
+                             callback = updateTerrainParameters)
         
         dpg.add_button(label = "REGNERATE", callback = requestTerrainRegeneration)
 
@@ -72,8 +78,14 @@ def updateTerrainParameters(sender, app_data):
         "octaves": "HEIGHTMAP_OCTAVES",
         "persistence": "HEIGHTMAP_PERSISTENCE",
         "lacunarity": "HEIGHTMAP_LACUNARITY",
-        "hydraulic_erosion": "SIMULATE_EROSION"
+        "hydraulic_erosion": "SIMULATE_EROSION",
+        "iterations": "EROSION_ITERATIONS"
     }
-    if sender in param_map:
+    if sender == "iterations":
+        STEP_SIZE = 10000
+        snapped_value = round(app_data / STEP_SIZE) * STEP_SIZE
+        dpg.set_value("iterations", snapped_value)
+        setattr(config, param_map[sender], snapped_value)
+    elif sender in param_map:
         setattr(config, param_map[sender], app_data)
         config.TERRAIN_NEEDS_UPDATE = True
