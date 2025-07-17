@@ -6,7 +6,7 @@ logger = logging.getLogger("TERRAIN")
 
 def initializeTerrainControls():
     logger.info("Initializing terrain control panel..")
-    with dpg.window(label = "Terrain Parameters", width = 400, height = 240, pos = (0,0),
+    with dpg.window(label = "Terrain Parameters", width = 400, height = 270, pos = (0,0),
                     no_close = True, no_collapse = True, no_move = True):
         dpg.add_input_int(label = "Base Seed",
                              default_value = config.HEIGHTMAP_BASE_SEED,
@@ -52,10 +52,16 @@ def initializeTerrainControls():
                              max_value = 1e6, 
                              tag = "iterations",
                              callback = updateTerrainParameters)
+        dpg.add_slider_float(label = "INIT VELOCITY",
+                             default_value = config.EROSION_INIT_VELOCITY, 
+                             min_value = 0.0, 
+                             max_value = 3.0, 
+                             tag = "init_velocity",
+                             callback = updateTerrainParameters)
         
         dpg.add_button(label = "REGNERATE", callback = requestTerrainRegeneration)
 
-    with dpg.window(label = "Terrain Stats", width = 400, height = 300, pos = (0, 250),
+    with dpg.window(label = "Terrain Stats", width = 400, height = 300, pos = (0, 280),
                     no_close = True, no_collapse = True, no_move = True):
         dpg.add_text(f"Triangles: {config.STATS.TRIANGLE_COUNT}", tag="tri_count")
         dpg.add_text(f"Vertices: {config.STATS.VERTEX_COUNT}", tag="vert_count")
@@ -79,13 +85,15 @@ def updateTerrainParameters(sender, app_data):
         "persistence": "HEIGHTMAP_PERSISTENCE",
         "lacunarity": "HEIGHTMAP_LACUNARITY",
         "hydraulic_erosion": "SIMULATE_EROSION",
-        "iterations": "EROSION_ITERATIONS"
+        "iterations": "EROSION_ITERATIONS",
+        "init_velocity": "EROSION_INIT_VELOCITY"
     }
     if sender == "iterations":
         STEP_SIZE = 10000
         snapped_value = round(app_data / STEP_SIZE) * STEP_SIZE
         dpg.set_value("iterations", snapped_value)
         setattr(config, param_map[sender], snapped_value)
+        config.TERRAIN_NEEDS_UPDATE = True
     elif sender in param_map:
         setattr(config, param_map[sender], app_data)
         config.TERRAIN_NEEDS_UPDATE = True

@@ -30,7 +30,10 @@ def generateMesh(heightmap):
     utility.resetErosionStatistics()
 
     if config.SIMULATE_EROSION:
-        heightmap, config.STATS.TOTAL_D, config.STATS.TOTAL_E = simulateHydraulicErosion_accelerated(heightmap, config.EROSION_ITERATIONS)
+        heightmap, config.STATS.TOTAL_D, config.STATS.TOTAL_E = simulateHydraulicErosion_accelerated(
+            heightmap, 
+            iterations = config.EROSION_ITERATIONS,
+            initial_velocity = config.EROSION_INIT_VELOCITY)
         config.STATS.ERO_TIME = (time.perf_counter() - ero_start) * 1000
         utility.outputErosionStatistics()
 
@@ -121,16 +124,18 @@ def simulateHydraulicErosion(heightmap, iterations = 20000, erosion_radius = 3):
     return hmap
 
 @njit
-def simulateHydraulicErosion_accelerated(heightmap, iterations=1000000, erosion_radius=3):
+def simulateHydraulicErosion_accelerated(heightmap, 
+                                         iterations=1000000, 
+                                         initial_velocity = 0.0, 
+                                         erosion_radius=3):
     hmap = heightmap.copy()
     width, height = hmap.shape
-
     total_d = 0.0
     total_e = 0.0
 
     for _ in range(iterations):
         x, y = np.random.randint(0, width), np.random.randint(0, height)
-        d_vel = 0.0
+        d_vel = initial_velocity
         d_mass = 0.0
         d_water = 1.0
 
