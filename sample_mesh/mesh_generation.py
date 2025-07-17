@@ -26,9 +26,13 @@ def generateMesh(heightmap):
     vertices = []
     indices = []
     width, depth = heightmap.shape
+    ero_start = time.perf_counter()
+    utility.resetErosionStatistics()
 
     if config.SIMULATE_EROSION:
-        heightmap = simulateHydraulicErosion_accelerated(heightmap)
+        heightmap, config.STATS.TOTAL_D, config.STATS.TOTAL_E = simulateHydraulicErosion_accelerated(heightmap)
+        config.STATS.ERO_TIME = (time.perf_counter() - ero_start) * 1000
+        utility.outputErosionStatistics()
 
     #generate vertice list
     for x in range(width):
@@ -51,9 +55,6 @@ def generateMesh(heightmap):
 
 def regenerateTerrain():   
     gen_start = time.perf_counter()
-    config.STATS.TOTAL_D = 0.0
-    config.STATS.TOTAL_E = 0.0
-
     heightmap = generateHeightmap()
     vertices, indices = generateMesh(heightmap)
     config.STATS.VERTEX_COUNT = len(vertices)
@@ -76,6 +77,7 @@ def renderTerrain(vertices, indices):
             glVertex3fv(vertex)
     glEnd()
 
+# CPU non-accelerated method
 def simulateHydraulicErosion(heightmap, iterations = 20000, erosion_radius = 3):
     hmap = heightmap.copy()
     width, height = hmap.shape
@@ -135,7 +137,7 @@ def simulateHydraulicErosion_accelerated(heightmap, iterations=1000000, erosion_
         for _ in range(30):  # max droplet lifetime
             x_int, y_int = int(x), int(y)
 
-            # gradient calculation
+            # gradient calculation - bilinear interpolation
             if x_int < 0 or x_int >= width - 1 or y_int < 0 or y_int >= height - 1:
                 dx = 0.0
                 dy = 0.0
@@ -184,6 +186,4 @@ def simulateHydraulicErosion_accelerated(heightmap, iterations=1000000, erosion_
             d_vel = max(0.0, d_vel + slope - 0.1)
             d_water *= 0.99
     
-    print("TOTAL DEPOSITED/ERODED")
-    print(total_d, total_e)
-    return hmap
+    return hmap, total_d, total_e

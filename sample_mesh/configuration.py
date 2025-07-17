@@ -27,3 +27,4 @@ class STATS:
     FPS = 0
     TOTAL_D = 0.0
     TOTAL_E = 0.0
+    ERO_TIME = 0.0

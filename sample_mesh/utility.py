@@ -24,6 +24,16 @@ def calculateGradient(hmap, x, y, x_int, y_int,
     dy = np.clip(dy, -10, 10)
     return dx, dy
 
+def outputErosionStatistics():
+    print(f"PARTICLES_DEPOSITED: {config.STATS.TOTAL_D}")
+    print(f"PARTICLES_ERODED: {config.STATS.TOTAL_E}")
+    print(f"EROSION_TIME: {round(config.STATS.ERO_TIME,3)}ms")
+
+def resetErosionStatistics():
+    config.STATS.TOTAL_D = 0.0
+    config.STATS.TOTAL_E = 0.0
+    config.STATS.ERO_TIME = 0.0
+
 def terrainParamsToLogger(onStart = False):
     message = "Regeneration successful"
     if onStart:
