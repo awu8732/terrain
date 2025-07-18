@@ -5,25 +5,6 @@ import numpy as np
 
 logger = logging.getLogger("TERRAIN")
 
-# bilinear interpolatin for smooth gradients
-def calculateGradient(hmap, x, y, x_int, y_int, 
-                      width = config.WINDOW_WIDTH, depth = config.HEIGHTMAP_DEPTH):
-    if x_int < 0 or x_int >= width - 1 or y_int < 0 or y_int >= depth - 1:
-        return 0,0
-    xf, yf = x - x_int, y - y_int
-    h00 = hmap[x_int, y_int]
-    h10 = hmap[x_int+1, y_int]
-    h01 = hmap[x_int, y_int+1]
-    h11 = hmap[x_int+1, y_int+1]
-
-    dx = (h10 - h00) * (1 - yf) + (h11 - h01) * yf
-    dy = (h01 - h00) * (1 - xf) + (h11 - h10) * xf
-
-    #clip for terrain erosion
-    dx = np.clip(dx, -10, 10)
-    dy = np.clip(dy, -10, 10)
-    return dx, dy
-
 def outputErosionStatistics():
     print(f"PARTICLES_DEPOSITED: {config.STATS.TOTAL_D}")
     print(f"PARTICLES_ERODED: {config.STATS.TOTAL_E}")
