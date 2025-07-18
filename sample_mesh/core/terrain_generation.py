@@ -7,19 +7,20 @@ from OpenGL.GL import *
 from OpenGL.GLU import *
 
 import configuration as config
+import models.terrain
 import utility
 
-def generateHeightmap():
-    heights = np.zeros((config.HEIGHTMAP_WIDTH, config.HEIGHTMAP_DEPTH))
-    for x in range(config.HEIGHTMAP_WIDTH):
-        for z in range(config.HEIGHTMAP_DEPTH):
-            nx = x / config.HEIGHTMAP_WIDTH * config.HEIGHTMAP_SCALE
-            nz = z / config.HEIGHTMAP_DEPTH * config.HEIGHTMAP_SCALE
+def generateHeightmap(width, depth, scale, octaves, persistence, lacunarity, base_seed):
+    heights = np.zeros((width, depth))
+    for x in range(width):
+        for z in range(depth):
+            nx = x / width * scale
+            nz = z / depth * scale
             heights[x][z] = pnoise2(nx, nz, 
-                                    octaves = config.HEIGHTMAP_OCTAVES, 
-                                    persistence = config.HEIGHTMAP_PERSISTENCE,
-                                    lacunarity = config.HEIGHTMAP_LACUNARITY, 
-                                    base = config.HEIGHTMAP_BASE_SEED)
+                                    octaves = octaves, 
+                                    persistence = persistence,
+                                    lacunarity = lacunarity, 
+                                    base = base_seed)
     return heights
 
 def generateMesh(heightmap):
@@ -30,7 +31,7 @@ def generateMesh(heightmap):
     utility.resetErosionStatistics()
 
     if config.SIMULATE_EROSION:
-        heightmap, config.STATS.TOTAL_D, config.STATS.TOTAL_E = simulateHydraulicErosion_accelerated(
+        heightmap, config.STATS.TOTAL_D, config.STATS.TOTAL_E = simulateHydraulicErosion_numba(
             heightmap, 
             iterations = config.EROSION_ITERATIONS,
             initial_velocity = config.EROSION_INIT_VELOCITY)
@@ -58,8 +59,10 @@ def generateMesh(heightmap):
 
 def regenerateTerrain():   
     gen_start = time.perf_counter()
-    heightmap = generateHeightmap()
-    vertices, indices = generateMesh(heightmap)
+    terrain = models.terrain.Terrain()
+    #heightmap = generateHeightmap()
+
+    vertices, indices = generateMesh(terrain.heightmap)
     config.STATS.VERTEX_COUNT = len(vertices)
     config.STATS.TRIANGLE_COUNT = len(indices) // 3
     config.STATS.GEN_TIME = (time.perf_counter() - gen_start) * 1000
@@ -124,7 +127,7 @@ def simulateHydraulicErosion(heightmap, iterations = 20000, erosion_radius = 3):
     return hmap
 
 @njit
-def simulateHydraulicErosion_accelerated(heightmap, 
+def simulateHydraulicErosion_numba(heightmap, 
                                          iterations=1000000, 
                                          initial_velocity = 0.0, 
                                          erosion_radius=3):
