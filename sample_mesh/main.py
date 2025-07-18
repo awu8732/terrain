@@ -8,7 +8,7 @@ from OpenGL.GLU import *
 
 import configuration as config
 import core.env_manager as env
-from mesh_generation import *
+from core.terrain import *
 from utility import *
 
 logging.basicConfig(
