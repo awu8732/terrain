@@ -18,15 +18,3 @@ EROSION_INIT_VELOCITY = 0.0
 SIMULATE_EROSION = False
 TERRAIN_NEEDS_UPDATE = False
 TERRAIN_REGEN_REQ = False
-
-class STATS:
-    TRIANGLE_COUNT = 0
-    VERTEX_COUNT = 0
-    ITER_COUNT = 0
-    GEN_TIME = 0.0          # terrain generation time (ms)
-    RENDER_TIME = 0.0       # gpu rendering time (ms)
-    FRAME_TIME = 0.0        # full frame time (ms)
-    FPS = 0
-    TOTAL_D = 0.0
-    TOTAL_E = 0.0
-    ERO_TIME = 0.0

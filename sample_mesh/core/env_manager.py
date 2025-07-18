@@ -8,6 +8,7 @@ from OpenGL.GLU import *
 
 import configuration as config
 import core.ui_manager as ui
+import models.stats
 
 logger = logging.getLogger("TERRAIN")
 
@@ -17,6 +18,7 @@ def configureEnvironment():
     
     pygame.display.set_mode(display, DOUBLEBUF | OPENGL)
     config.HEIGHTMAP_BASE_SEED = rand.randint(1, 500)
+    config.STATS = models.stats.Stats()
 
     #initialize OpenGL and DearPy
     glMatrixMode(GL_PROJECTION)
