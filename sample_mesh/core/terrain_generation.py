@@ -60,8 +60,6 @@ def generateMesh(heightmap):
 def regenerateTerrain():   
     gen_start = time.perf_counter()
     terrain = models.terrain.Terrain()
-    #heightmap = generateHeightmap()
-
     vertices, indices = generateMesh(terrain.heightmap)
     config.STATS.VERTEX_COUNT = len(vertices)
     config.STATS.TRIANGLE_COUNT = len(indices) // 3
@@ -72,15 +70,28 @@ def regenerateTerrain():
     glMatrixMode(GL_MODELVIEW)
     glLoadIdentity()
     glTranslatef(-1 * config.HEIGHTMAP_WIDTH / 2, -0.06 * config.HEIGHTMAP_DEPTH, -1 * config.HEIGHTMAP_DEPTH)
-    return vertices, indices
+    return vertices, indices, terrain.biome_map
 
-def renderTerrain(vertices, indices):
+def renderTerrain(vertices, indices, biome_map):
     glBegin(GL_TRIANGLES)
     for triangle in indices:
         for index in triangle:
-            vertex = vertices[index]
-            glColor3f(0.3, 0.8 - vertex[1] * 0.1, 0.3)
-            glVertex3fv(vertex)
+            x, y, z = vertices[index]
+            i = int(round(x))
+            j = int(round(z))
+
+            # Defensive check to stay in bounds
+            if 0 <= i < biome_map.shape[0] and 0 <= j < biome_map.shape[1]:
+                biome = biome_map[i][j]
+                color = config.BIOME_COLORS.get(biome, (128, 128, 128))  # default gray
+            else:
+                color = (255, 0, 0)  # red = out-of-bounds error
+
+            # Normalize to 0.0–1.0 for OpenGL
+            r, g, b = [c - y * 0.1 for c in color]
+            #print(r,g,b)
+            glColor3f(r,g,b)
+            glVertex3f(x, y, z)
     glEnd()
 
 @njit

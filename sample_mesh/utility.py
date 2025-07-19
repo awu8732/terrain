@@ -5,6 +5,22 @@ import numpy as np
 
 logger = logging.getLogger("TERRAIN")
 
+def getBiome(temperature, moisture):
+    if temperature < 0.3:
+        return "TUNDRA" if moisture < 0.4 else "TAIGA"
+    elif temperature > 0.7:
+        if moisture < 0.2:
+            return "DESERT"
+        elif moisture > 0.8:
+            return "RAINFOREST"
+        else:
+            return "SAVANNA"
+    else:
+        if moisture < 0.3:
+            return "GRASSLAND"
+        else:
+            return "TEMPERATE"
+
 def outputErosionStatistics():
     print(f"PARTICLES_DEPOSITED: {config.STATS.TOTAL_D}")
     print(f"PARTICLES_ERODED: {config.STATS.TOTAL_E}")
