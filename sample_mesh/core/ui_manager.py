@@ -6,7 +6,7 @@ logger = logging.getLogger("TERRAIN")
 
 def initializeTerrainControls():
     logger.info("Initializing terrain control panel..")
-    with dpg.window(label = "Terrain Parameters", width = 400, height = 270, pos = (0,0),
+    with dpg.window(label = "Terrain Parameters", width = 400, height = 300, pos = (0,0),
                     no_close = True, no_collapse = True, no_move = True):
         dpg.add_input_int(label = "Base Seed",
                              default_value = config.HEIGHTMAP_BASE_SEED,
@@ -59,9 +59,26 @@ def initializeTerrainControls():
                              tag = "init_velocity",
                              callback = updateTerrainParameters)
         
+        dpg.add_checkbox(label="Enable Biome",
+                     default_value=config.SIMULATE_EROSION,
+                     tag="biome",
+                     callback=updateTerrainParameters)
+        dpg.add_slider_float(label = "TEMPERATURE",
+                             default_value = config.BIOME_TEMPERATURE, 
+                             min_value = 0.0, 
+                             max_value = 5.0, 
+                             tag = "temperature",
+                             callback = updateTerrainParameters)
+        dpg.add_slider_float(label = "MOISTURE",
+                             default_value = config.BIOME_MOISTURE, 
+                             min_value = 0.0, 
+                             max_value = 5.0, 
+                             tag = "moisture",
+                             callback = updateTerrainParameters)
+        
         dpg.add_button(label = "REGNERATE", callback = requestTerrainRegeneration)
 
-    with dpg.window(label = "Terrain Stats", width = 400, height = 300, pos = (0, 280),
+    with dpg.window(label = "Terrain Stats", width = 400, height = 280, pos = (0, 310),
                     no_close = True, no_collapse = True, no_move = True):
         dpg.add_text(f"Triangles: {config.STATS.TRIANGLE_COUNT}", tag="tri_count")
         dpg.add_text(f"Vertices: {config.STATS.VERTEX_COUNT}", tag="vert_count")
@@ -86,7 +103,10 @@ def updateTerrainParameters(sender, app_data):
         "lacunarity": "HEIGHTMAP_LACUNARITY",
         "hydraulic_erosion": "SIMULATE_EROSION",
         "iterations": "EROSION_ITERATIONS",
-        "init_velocity": "EROSION_INIT_VELOCITY"
+        "init_velocity": "EROSION_INIT_VELOCITY",
+        "biome": "SIMULATE_BIOME",
+        "temperature": "BIOME_TEMPERATURE",
+        "moisture": "BIOME_MOISTURE"
     }
     if sender == "iterations":
         STEP_SIZE = 10000
