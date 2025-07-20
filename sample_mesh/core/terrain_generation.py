@@ -76,22 +76,27 @@ def renderTerrain(vertices, indices, biome_map):
     glBegin(GL_TRIANGLES)
     for triangle in indices:
         for index in triangle:
-            x, y, z = vertices[index]
-            i = int(round(x))
-            j = int(round(z))
+            if config.SIMULATE_BIOME:
+                x, y, z = vertices[index]
+                i = int(round(x))
+                j = int(round(z))
 
-            # Defensive check to stay in bounds
-            if 0 <= i < biome_map.shape[0] and 0 <= j < biome_map.shape[1]:
-                biome = biome_map[i][j]
-                color = config.BIOME_COLORS.get(biome, (128, 128, 128))  # default gray
+                # Defensive check to stay in bounds
+                if 0 <= i < biome_map.shape[0] and 0 <= j < biome_map.shape[1]:
+                    biome = biome_map[i][j]
+                    color = config.BIOME_COLORS.get(biome, (128, 128, 128))  # default gray
+                else:
+                    color = (255, 0, 0)  # red = out-of-bounds error
+
+                # Normalize to 0.0–1.0 for OpenGL
+                r, g, b = [c - y * 0.1 for c in color]
+                #print(r,g,b)
+                glColor3f(r,g,b)
+                glVertex3f(x, y, z)
             else:
-                color = (255, 0, 0)  # red = out-of-bounds error
-
-            # Normalize to 0.0–1.0 for OpenGL
-            r, g, b = [c - y * 0.1 for c in color]
-            #print(r,g,b)
-            glColor3f(r,g,b)
-            glVertex3f(x, y, z)
+                vertex = vertices[index]
+                glColor3f(0.3 + vertex[1] * 0.02, 0.30 + vertex[1] * 0.1, 0.3)
+                glVertex3fv(vertex)
     glEnd()
 
 @njit
