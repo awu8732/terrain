@@ -1,5 +1,6 @@
 from noise import pnoise2
 import numpy as np
+#import matplotlib.pyplot as plt
 
 import configuration as config
 import core.terrain_generation
@@ -36,24 +37,35 @@ class Terrain:
         )
     
     def _generateTemperatureMap(self):
+        frequency = 3.0 / min(self.width, self.depth)
         for x in range(self.width):
             for z in range(self.depth):
-                latitude = z / self.depth  # simulate "latitude"
-                elevation = self.heightmap[x][z]
-                temp = 1.0 - abs(latitude - 0.5) * 2
-                temp -= elevation * 0.5
-                self.temperature_map[x][z] = np.clip(temp, 0.0, 1.0)
+                nx = x * frequency
+                nz = z * frequency
+                perlin_t = (pnoise2(nx, nz, octaves=3, base=config.HEIGHTMAP_BASE_SEED) + 1.05) / 2.0  # range [0, 1]
+                abs_height = (self.heightmap[x][z] + 1) / 2
+                calc_t = perlin_t * (1.0 - abs_height * 0.2) * config.BIOME_TEMPERATURE
+
+                self.temperature_map[x][z] = np.clip(calc_t, 0.0, 1.0)
+
+        # plt.imshow(self.temperature_map, cmap="plasma", origin="lower")
+        # plt.colorbar(label="Temperature")
+        # plt.show()
 
     def _generateMoistureMap(self):
-        moisture_scale = 5.0  # adjustable
+        frequency = 3.0 / min(self.width, self.depth)
         for x in range(self.width):
             for z in range(self.depth):
-                nx = x / self.width * moisture_scale
-                nz = z / self.depth * moisture_scale
-                moisture = pnoise2(nx, nz, 
-                                   octaves=2, 
-                                   base=config.HEIGHTMAP_BASE_SEED)
-                self.moisture_map[x][z] = np.clip((moisture + 1) / 2, 0.0, 1.0)
+                nx = x * frequency
+                nz = z * frequency
+                perlin_m = pnoise2(nx, nz, octaves=3, base=config.HEIGHTMAP_BASE_SEED)
+                abs_height = (self.heightmap[x][z] + 1) / 2
+                calc_m = perlin_m  / 2.0 + config.BIOME_MOISTURE ** 2 - abs_height * 0.2 + 0.05
+                self.moisture_map[x][z] = np.clip(calc_m, 0.0, 1.0)
+
+        # plt.imshow(self.moisture_map, cmap="viridis", origin="lower")
+        # plt.colorbar(label="Moisture Level")
+        # plt.show()
 
     def _assignBiomes(self):
         for x in range(self.width):
