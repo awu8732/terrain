@@ -66,13 +66,13 @@ def initializeTerrainControls():
         dpg.add_slider_float(label = "TEMPERATURE",
                              default_value = config.BIOME_TEMPERATURE, 
                              min_value = 0.0, 
-                             max_value = 5.0, 
+                             max_value = 1.0, 
                              tag = "temperature",
                              callback = updateTerrainParameters)
         dpg.add_slider_float(label = "MOISTURE",
                              default_value = config.BIOME_MOISTURE, 
                              min_value = 0.0, 
-                             max_value = 5.0, 
+                             max_value = 1.0, 
                              tag = "moisture",
                              callback = updateTerrainParameters)
         
