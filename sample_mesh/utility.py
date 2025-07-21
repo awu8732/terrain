@@ -33,6 +33,18 @@ def getBiomeColorFromVertex(vertex, biome_map,
         return config.BIOME_COLORS.get(biome, default_color)
     else:
         return error_color
+    
+def getCameraEyePos(width, depth, elevation_view):
+    eye_x = width / 2
+    eye_y = elevation_view * depth
+    eye_z = depth
+    return np.array([eye_x, eye_y, eye_z])
+
+def getCameraViewVec(width, depth, elevation_view):
+    eye = getCameraEyePos(width, depth, elevation_view)
+    center = np.array([width / 2, 0.0, depth / 2])
+    view_dir = center - eye
+    return view_dir / np.linalg.norm(view_dir)
 
 def outputErosionStatistics():
     print(f"PARTICLES_DEPOSITED: {config.STATS.TOTAL_D}")

@@ -10,6 +10,7 @@ from OpenGL.GLU import *
 import configuration as config
 import core.ui_manager as ui
 import models.stats
+import utility
 
 logger = logging.getLogger("TERRAIN")
 
@@ -46,7 +47,7 @@ def cleanupEnvironment():
 
 def configureLightingVectors():
     light_dir = np.array(config.LIGHTING_L_DIR)
-    view_dir = np.array(config.LIGHTING_V_DIR)
-
     config.LIGHTING_L_DIR = light_dir / np.linalg.norm(light_dir)
-    config.LIGHTING_V_DIR = view_dir / np.linalg.norm(view_dir)
+    config.LIGHTING_V_DIR = utility.getCameraViewVec(config.HEIGHTMAP_WIDTH, 
+                                                     config.HEIGHTMAP_DEPTH, 
+                                                     config.ELEVATION_VIEW)

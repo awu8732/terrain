@@ -71,6 +71,7 @@ def regenerateTerrain():
     gen_start = time.perf_counter()
     terrain = models.terrain.Terrain()
     vertices, indices, normals = generateMesh(terrain.heightmap)
+    eye = utility.getCameraEyePos(config.HEIGHTMAP_WIDTH, config.HEIGHTMAP_DEPTH, config.ELEVATION_VIEW)
     config.STATS.VERTEX_COUNT = len(vertices)
     config.STATS.TRIANGLE_COUNT = len(indices) // 3
     config.STATS.GEN_TIME = (time.perf_counter() - gen_start) * 1000
@@ -79,15 +80,10 @@ def regenerateTerrain():
     #reset opengl view
     glMatrixMode(GL_MODELVIEW)
     glLoadIdentity()
-    glTranslatef(-1 * config.HEIGHTMAP_WIDTH / 2, -0.06 * config.HEIGHTMAP_DEPTH, -1 * config.HEIGHTMAP_DEPTH)
+    glTranslatef(-eye[0], -eye[1], -eye[2])
     return vertices, indices, normals, terrain.biome_map
 
 def renderTerrain(vertices, indices, normals, biome_map):
-    light_dir = np.array([1.0, 1.0, 0.8])
-    light_dir = light_dir / np.linalg.norm(light_dir)
-    view_dir = np.array([0.0, 1.0, 1.0])
-    view_dir = view_dir / np.linalg.norm(view_dir)
-
     intensities = computeBlinnPhongIntensities_numba(
         np.array(normals),
         config.LIGHTING_L_DIR,
