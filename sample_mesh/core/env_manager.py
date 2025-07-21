@@ -1,4 +1,5 @@
 import logging
+import numpy as np
 import random as rand
 import pygame
 from pygame.locals import *
@@ -19,6 +20,7 @@ def configureEnvironment():
     pygame.display.set_mode(display, DOUBLEBUF | OPENGL)
     config.HEIGHTMAP_BASE_SEED = rand.randint(1, 500)
     config.STATS = models.stats.Stats()
+    configureLightingVectors()
 
     #initialize OpenGL and DearPy
     glMatrixMode(GL_PROJECTION)
@@ -41,3 +43,10 @@ def configureEnvironment():
 def cleanupEnvironment():
     dpg.destroy_context()
     pygame.quit()
+
+def configureLightingVectors():
+    light_dir = np.array(config.LIGHTING_L_DIR)
+    view_dir = np.array(config.LIGHTING_V_DIR)
+
+    config.LIGHTING_L_DIR = light_dir / np.linalg.norm(light_dir)
+    config.LIGHTING_V_DIR = view_dir / np.linalg.norm(view_dir)

@@ -90,8 +90,8 @@ def renderTerrain(vertices, indices, normals, biome_map):
 
     intensities = computeBlinnPhongIntensities_numba(
         np.array(normals),
-        light_dir,
-        view_dir,
+        config.LIGHTING_L_DIR,
+        config.LIGHTING_V_DIR,
         config.LIGHTING_K_AMB,
         config.LIGHTING_K_DIFF,
         config.LIGHTING_K_SPEC,
