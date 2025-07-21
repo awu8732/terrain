@@ -21,6 +21,19 @@ def getBiome(temperature, moisture):
         else:
             return "TEMPERATE"
 
+def getBiomeColorFromVertex(vertex, biome_map, 
+                            default_color=(128, 128, 128), 
+                            error_color=(255, 0, 0)):
+    x, y, z = vertex
+    i = int(round(x))
+    j = int(round(z))
+
+    if 0 <= i < biome_map.shape[0] and 0 <= j < biome_map.shape[1]:
+        biome = biome_map[i][j]
+        return config.BIOME_COLORS.get(biome, default_color)
+    else:
+        return error_color
+
 def outputErosionStatistics():
     print(f"PARTICLES_DEPOSITED: {config.STATS.TOTAL_D}")
     print(f"PARTICLES_ERODED: {config.STATS.TOTAL_E}")
@@ -39,15 +52,15 @@ def terrainParamsToLogger(onStart = False):
         f"\033[0m{message}: \033[0m | "
         f"\033[36mSeed\033[0m: {config.HEIGHTMAP_BASE_SEED} | "
         f"\033[36mRes\033[0m: {config.HEIGHTMAP_WIDTH}x{config.HEIGHTMAP_DEPTH}|\n"
-        f"    \033[33mScale\033[0m={round(config.HEIGHTMAP_SCALE, 2)} "
-        f"\033[33mOctaves\033[0m={config.HEIGHTMAP_OCTAVES} "
-        f"\033[33mPersist\033[0m={round(config.HEIGHTMAP_PERSISTENCE, 3)} "
-        f"\033[33mLacun\033[0m={round(config.HEIGHTMAP_LACUNARITY, 3)} "
+        f"    \033[33mScl\033[0m={round(config.HEIGHTMAP_SCALE, 2)} "
+        f"\033[33mOct\033[0m={config.HEIGHTMAP_OCTAVES} "
+        f"\033[33mPer\033[0m={round(config.HEIGHTMAP_PERSISTENCE, 3)} "
+        f"\033[33mLac\033[0m={round(config.HEIGHTMAP_LACUNARITY, 3)} "
         f"\033[35mEro\033[0m={'Y' if config.SIMULATE_EROSION else 'N'} "
-        f"\033[35mIter\033[0m={config.EROSION_ITERATIONS} "
+        f"\033[35mItr\033[0m={config.EROSION_ITERATIONS} "
         f"\033[35mVel\033[0m={round(config.EROSION_INIT_VELOCITY,3)} "
-        f"\033[32mBiom\033[0m={'Y' if config.SIMULATE_BIOME else 'N'} "
-        f"\033[32mMois\033[0m={round(config.BIOME_MOISTURE,3)} "
+        f"\033[32mBio\033[0m={'Y' if config.SIMULATE_BIOME else 'N'} "
+        f"\033[32mMoi\033[0m={round(config.BIOME_MOISTURE,3)} "
         f"\033[32mTmp\033[0m={round(config.BIOME_TEMPERATURE,3)} "
     )
 
