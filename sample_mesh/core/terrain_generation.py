@@ -26,6 +26,7 @@ def generateHeightmap(width, depth, scale, octaves, persistence, lacunarity, bas
 def generateMesh(heightmap):
     vertices = []
     indices = []
+    normals = []
     width, depth = heightmap.shape
     ero_start = time.perf_counter()
     utility.resetErosionStatistics()
@@ -38,11 +39,20 @@ def generateMesh(heightmap):
         config.STATS.ERO_TIME = (time.perf_counter() - ero_start) * 1000
         utility.outputErosionStatistics()
 
-    #generate vertice list
+    dzdx, dzdy = np.gradient(heightmap)
+    #generate vertice list & normal map
     for x in range(width):
         for z in range(depth):
             y = heightmap[x][z] * config.HEIGHTMAP_SCALE
             vertices.append((x,y,z))
+
+            # Normal from gradient
+            nx = -dzdx[x][z]
+            ny = 1.0
+            nz = -dzdy[x][z]
+            normal = np.array([nx, ny, nz])
+            normal /= np.linalg.norm(normal)
+            normals.append(tuple(normal))
 
     #assign generic triangle indices
     for x in range(width - 1):
@@ -55,12 +65,12 @@ def generateMesh(heightmap):
             indices.append((top_left, bottom_left, top_right))
             indices.append((top_right, bottom_left, bottom_right))
 
-    return vertices, indices
+    return vertices, indices, normals
 
 def regenerateTerrain():   
     gen_start = time.perf_counter()
     terrain = models.terrain.Terrain()
-    vertices, indices = generateMesh(terrain.heightmap)
+    vertices, indices, normals = generateMesh(terrain.heightmap)
     config.STATS.VERTEX_COUNT = len(vertices)
     config.STATS.TRIANGLE_COUNT = len(indices) // 3
     config.STATS.GEN_TIME = (time.perf_counter() - gen_start) * 1000
@@ -70,12 +80,33 @@ def regenerateTerrain():
     glMatrixMode(GL_MODELVIEW)
     glLoadIdentity()
     glTranslatef(-1 * config.HEIGHTMAP_WIDTH / 2, -0.06 * config.HEIGHTMAP_DEPTH, -1 * config.HEIGHTMAP_DEPTH)
-    return vertices, indices, terrain.biome_map
+    return vertices, indices, normals, terrain.biome_map
 
-def renderTerrain(vertices, indices, biome_map):
+def renderTerrain(vertices, indices, normals, biome_map):
+    light_dir = np.array([1.0, 1.0, 0.8])
+    light_dir = light_dir / np.linalg.norm(light_dir)
+    view_dir = np.array([0.0, 1.0, 1.0])
+    view_dir = view_dir / np.linalg.norm(view_dir)
+
+    k_ambient = 0.2
+    k_diffuse = 0.6
+    k_specular = 0.4
+    shininess = 32
+
+    intensities = computeBlinnPhongIntensities_numba(
+        np.array(normals),
+        light_dir,
+        view_dir,
+        k_ambient,
+        k_diffuse,
+        k_specular,
+        shininess
+    )
+
     glBegin(GL_TRIANGLES)
     for triangle in indices:
         for index in triangle:
+
             if config.SIMULATE_BIOME:
                 x, y, z = vertices[index]
                 i = int(round(x))
@@ -84,20 +115,39 @@ def renderTerrain(vertices, indices, biome_map):
                 # Defensive check to stay in bounds
                 if 0 <= i < biome_map.shape[0] and 0 <= j < biome_map.shape[1]:
                     biome = biome_map[i][j]
-                    color = config.BIOME_COLORS.get(biome, (128, 128, 128))  # default gray
+                    base_color = config.BIOME_COLORS.get(biome, (128, 128, 128))  # default gray
                 else:
-                    color = (255, 0, 0)  # red = out-of-bounds error
+                    base_color = (255, 0, 0)  # red = out-of-bounds error
 
-                # Normalize to 0.0–1.0 for OpenGL
-                r, g, b = [c - y * 0.1 for c in color]
+                shaded_color = np.array(base_color) * intensities[index]
                 #print(r,g,b)
-                glColor3f(r,g,b)
+                glColor3f(*shaded_color)
                 glVertex3f(x, y, z)
             else:
                 vertex = vertices[index]
                 glColor3f(0.3 + vertex[1] * 0.02, 0.30 + vertex[1] * 0.1, 0.3)
                 glVertex3fv(vertex)
     glEnd()
+
+@njit
+def computeBlinnPhongIntensities_numba(normals, light_dir, view_dir, 
+                                     k_ambient, k_diffuse, k_specular, shininess):
+    intensities = np.zeros(normals.shape[0])
+    half_vec = (light_dir + view_dir)
+    half_vec /= np.linalg.norm(half_vec)
+
+    for i in range(normals.shape[0]):
+        norm = normals[i]
+        dot_nl = np.dot(norm, light_dir)
+        dot_nh = np.dot(norm, half_vec)
+
+        ambient = k_ambient
+        diffuse = k_diffuse * max(dot_nl, 0.0)
+        specular = k_specular * (max(dot_nh, 0.0) ** shininess)
+        intensity = ambient + diffuse + specular
+
+        intensities[i] = min(1.0, max(0.0, intensity))
+    return intensities
 
 @njit
 def simulateHydraulicErosion_numba(heightmap, 
