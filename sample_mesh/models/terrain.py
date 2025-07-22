@@ -13,7 +13,7 @@ class Terrain:
         self.scale = config.HEIGHTMAP_SCALE
 
         self.heightmap = np.zeros((self.width, self.depth))
-        self.normal_map = np.zeros((self.width * self.depth, 3), dtype=np.float32)
+        self.normal_map = np.zeros((self.width * self.depth, 3), dtype=np.float64)
         self.moisture_map = np.zeros((self.width, self.depth))
         self.temperature_map = np.zeros((self.width, self.depth))
         self.biome_map = np.full((self.width, self.depth), "", dtype=object)

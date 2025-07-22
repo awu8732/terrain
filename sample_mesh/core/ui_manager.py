@@ -76,6 +76,31 @@ def initializeTerrainControls():
                              tag = "moisture",
                              callback = updateTerrainParameters)
         
+        dpg.add_slider_float(label = "AMBIENT REF",
+                             default_value = config.LIGHTING_K_AMB, 
+                             min_value = 0.0, 
+                             max_value = 0.2, 
+                             tag = "ambient",
+                             callback = updateTerrainParameters)
+        dpg.add_slider_float(label = "DIFFUSE REF",
+                             default_value = config.LIGHTING_K_DIFF, 
+                             min_value = 0.0, 
+                             max_value = 1.0, 
+                             tag = "diffuse",
+                             callback = updateTerrainParameters)
+        dpg.add_slider_float(label = "SPEC REF",
+                             default_value = config.LIGHTING_K_SPEC, 
+                             min_value = 0.0, 
+                             max_value = 1.0, 
+                             tag = "specular",
+                             callback = updateTerrainParameters)
+        dpg.add_slider_int(label = "SHININESS",
+                             default_value = config.LIGHTING_SHIN, 
+                             min_value = 8, 
+                             max_value = 128, 
+                             tag = "shininess",
+                             callback = updateTerrainParameters)
+        
         dpg.add_button(label = "REGNERATE", callback = requestTerrainRegeneration)
 
     with dpg.window(label = "Terrain Stats", width = 400, height = 280, pos = (0, 310),
@@ -106,7 +131,11 @@ def updateTerrainParameters(sender, app_data):
         "init_velocity": "EROSION_INIT_VELOCITY",
         "biome": "SIMULATE_BIOME",
         "temperature": "BIOME_TEMPERATURE",
-        "moisture": "BIOME_MOISTURE"
+        "moisture": "BIOME_MOISTURE",
+        "ambient": "LIGHTING_K_AMB",
+        "diffuse": "LIGHTING_K_DIFF",
+        "specular": "LIGHITNG_K_SPEC",
+        "shininess": "LIGHTING_SHIN"
     }
     if sender == "iterations":
         STEP_SIZE = 10000

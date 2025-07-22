@@ -99,7 +99,7 @@ def renderTerrain(vertices, indices, normals, biome_map):
                 glVertex3fv(vertex)
     glEnd()
 
-#@njit
+@njit
 def computeBlinnPhongIntensities_numba(normals, light_dir, view_dir, 
                                      k_ambient, k_diffuse, k_specular, shininess):
     intensities = np.zeros(normals.shape[0])
@@ -112,11 +112,11 @@ def computeBlinnPhongIntensities_numba(normals, light_dir, view_dir,
         dot_nh = np.dot(norm, half_vec)
 
         ambient = k_ambient
-        diffuse = k_diffuse * max(dot_nl, 0.0)
-        specular = k_specular * (max(dot_nh, 0.0) ** shininess)
+        diffuse = k_diffuse * np.maximum(dot_nl, 0.0)
+        specular = k_specular * (np.maximum(dot_nh, 0.0) ** shininess)
         intensity = ambient + diffuse + specular
 
-        intensities[i] = min(1.0, max(0.0, intensity))
+        intensities[i] = np.minimum(1.0, np.maximum(0.0, intensity))
     return intensities
 
 @njit
