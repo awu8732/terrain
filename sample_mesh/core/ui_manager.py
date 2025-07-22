@@ -1,6 +1,7 @@
 import logging
 import dearpygui.dearpygui as dpg
 import configuration as config
+import core.state as state
 
 logger = logging.getLogger("TERRAIN")
 
@@ -105,18 +106,18 @@ def initializeTerrainControls():
 
     with dpg.window(label = "Terrain Stats", width = 400, height = 280, pos = (0, 310),
                     no_close = True, no_collapse = True, no_move = True):
-        dpg.add_text(f"Triangles: {config.STATS.TRIANGLE_COUNT}", tag="tri_count")
-        dpg.add_text(f"Vertices: {config.STATS.VERTEX_COUNT}", tag="vert_count")
+        dpg.add_text(f"Triangles: {state.STATS.TRIANGLE_COUNT}", tag="tri_count")
+        dpg.add_text(f"Vertices: {state.STATS.VERTEX_COUNT}", tag="vert_count")
 
-        dpg.add_text(f"Generation Time: {config.STATS.GEN_TIME}", tag="gen_time")
-        dpg.add_text(f"Rendering Time: {config.STATS.RENDER_TIME}", tag="render_time")
+        dpg.add_text(f"Generation Time: {state.STATS.GEN_TIME}", tag="gen_time")
+        dpg.add_text(f"Rendering Time: {state.STATS.RENDER_TIME}", tag="render_time")
 
-        dpg.add_text(f"Frame Time: {config.STATS.FRAME_TIME}", tag="frame_time")
-        dpg.add_text(f"FPS: {config.STATS.FPS}", tag="fps")
+        dpg.add_text(f"Frame Time: {state.STATS.FRAME_TIME}", tag="frame_time")
+        dpg.add_text(f"FPS: {state.STATS.FPS}", tag="fps")
 
 def requestTerrainRegeneration():
-    if config.TERRAIN_NEEDS_UPDATE:
-        config.TERRAIN_REGEN_REQ = True
+    if state.TERRAIN_NEEDS_UPDATE:
+        state.TERRAIN_REGEN_REQ = True
 
 def updateTerrainParameters(sender, app_data):
     param_map = {
@@ -142,7 +143,7 @@ def updateTerrainParameters(sender, app_data):
         snapped_value = round(app_data / STEP_SIZE) * STEP_SIZE
         dpg.set_value("iterations", snapped_value)
         setattr(config, param_map[sender], snapped_value)
-        config.TERRAIN_NEEDS_UPDATE = True
+        state.TERRAIN_NEEDS_UPDATE = True
     elif sender in param_map:
         setattr(config, param_map[sender], app_data)
-        config.TERRAIN_NEEDS_UPDATE = True
+        state.TERRAIN_NEEDS_UPDATE = True

@@ -1,6 +1,7 @@
 import logging
 import dearpygui.dearpygui as dpg
 import configuration as config
+import core.state as state
 import numpy as np
 
 logger = logging.getLogger("TERRAIN")
@@ -47,14 +48,14 @@ def getCameraViewVec(width, depth, elevation_view):
     return view_dir / np.linalg.norm(view_dir)
 
 def outputErosionStatistics():
-    print(f"PARTICLES_DEPOSITED: {config.STATS.TOTAL_D}")
-    print(f"PARTICLES_ERODED: {config.STATS.TOTAL_E}")
-    print(f"EROSION_TIME: {round(config.STATS.ERO_TIME,3)}ms")
+    print(f"PARTICLES_DEPOSITED: {state.STATS.TOTAL_D}")
+    print(f"PARTICLES_ERODED: {state.STATS.TOTAL_E}")
+    print(f"EROSION_TIME: {round(state.STATS.ERO_TIME,3)}ms")
 
 def resetErosionStatistics():
-    config.STATS.TOTAL_D = 0.0
-    config.STATS.TOTAL_E = 0.0
-    config.STATS.ERO_TIME = 0.0
+    state.STATS.TOTAL_D = 0.0
+    state.STATS.TOTAL_E = 0.0
+    state.STATS.ERO_TIME = 0.0
 
 def terrainParamsToLogger(onStart = False):
     message = "Regeneration successful"
@@ -78,10 +79,10 @@ def terrainParamsToLogger(onStart = False):
 
 def updateStatsDisplay():
     # Performance Metrics
-    dpg.set_value("frame_time", f"Frame Time: {config.STATS.FRAME_TIME:.1f}ms")
-    dpg.set_value("fps", f"FPS: {config.STATS.FPS:.0f}")
-    dpg.set_value("gen_time", f"Generation Time: {config.STATS.GEN_TIME:.1f}ms")
-    dpg.set_value("render_time", f"Rendering Time: {config.STATS.RENDER_TIME:.1f}ms")
+    dpg.set_value("frame_time", f"Frame Time: {state.STATS.FRAME_TIME:.1f}ms")
+    dpg.set_value("fps", f"FPS: {state.STATS.FPS:.0f}")
+    dpg.set_value("gen_time", f"Generation Time: {state.STATS.GEN_TIME:.1f}ms")
+    dpg.set_value("render_time", f"Rendering Time: {state.STATS.RENDER_TIME:.1f}ms")
     # Mesh Stats
-    dpg.set_value("tri_count", f"Triangles: {config.STATS.TRIANGLE_COUNT:,}")
-    dpg.set_value("vert_count", f"Vertices: {config.STATS.VERTEX_COUNT:,}")
+    dpg.set_value("tri_count", f"Triangles: {state.STATS.TRIANGLE_COUNT:,}")
+    dpg.set_value("vert_count", f"Vertices: {state.STATS.VERTEX_COUNT:,}")

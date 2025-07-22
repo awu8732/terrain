@@ -9,6 +9,7 @@ from OpenGL.GLU import *
 import configuration as config
 import core.env_manager as env
 from core.terrain_generation import *
+import core.state as state
 from utility import *
 
 logging.basicConfig(
@@ -33,15 +34,15 @@ def main():
             if event.type == QUIT:
                 running = False
 
-        if config.TERRAIN_NEEDS_UPDATE and config.TERRAIN_REGEN_REQ:
+        if state.TERRAIN_NEEDS_UPDATE and state.TERRAIN_REGEN_REQ:
             try:
                 vertices, indices, normals, biome_map = regenerateTerrain()
                 terrainParamsToLogger()
             except Exception as e:
                 logger.error(f"Regeneration failed: {e}")
             finally:
-                config.TERRAIN_NEEDS_UPDATE = False
-                config.TERRAIN_REGEN_REQ = False
+                state.TERRAIN_NEEDS_UPDATE = False
+                state.TERRAIN_REGEN_REQ = False
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
         render_start = time.perf_counter()
@@ -50,13 +51,13 @@ def main():
         glPopMatrix()
         
         #stats timing
-        config.STATS.RENDER_TIME = (time.perf_counter() - render_start) * 1000
-        config.STATS.FRAME_TIME = (time.perf_counter() - frame_start) * 1000
+        state.STATS.RENDER_TIME = (time.perf_counter() - render_start) * 1000
+        state.STATS.FRAME_TIME = (time.perf_counter() - frame_start) * 1000
 
-        frame_times.append(config.STATS.FRAME_TIME)
+        frame_times.append(state.STATS.FRAME_TIME)
         if len(frame_times) > 60:
             frame_times.pop(0)
-        config.STATS.FPS = 1000 / (sum(frame_times) / len(frame_times))
+        state.STATS.FPS = 1000 / (sum(frame_times) / len(frame_times))
 
         updateStatsDisplay()
         pygame.display.flip()

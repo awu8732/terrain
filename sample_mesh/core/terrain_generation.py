@@ -8,6 +8,7 @@ from OpenGL.GLU import *
 
 import configuration as config
 import models.terrain
+import core.state as state
 import utility
 
 def generateHeightmap(width, depth, scale, octaves, persistence, lacunarity, base_seed):
@@ -31,11 +32,11 @@ def generateMesh(heightmap):
     utility.resetErosionStatistics()
 
     if config.SIMULATE_EROSION:
-        heightmap, config.STATS.TOTAL_D, config.STATS.TOTAL_E = simulateHydraulicErosion_numba(
+        heightmap, state.STATS.TOTAL_D, state.STATS.TOTAL_E = simulateHydraulicErosion_numba(
             heightmap, 
             iterations = config.EROSION_ITERATIONS,
             initial_velocity = config.EROSION_INIT_VELOCITY)
-        config.STATS.ERO_TIME = (time.perf_counter() - ero_start) * 1000
+        state.STATS.ERO_TIME = (time.perf_counter() - ero_start) * 1000
         utility.outputErosionStatistics()
         
     #generate vertice list & normal map
@@ -62,9 +63,9 @@ def regenerateTerrain():
     terrain = models.terrain.Terrain()
     vertices, indices = generateMesh(terrain.heightmap)
     eye = utility.getCameraEyePos(config.HEIGHTMAP_WIDTH, config.HEIGHTMAP_DEPTH, config.ELEVATION_VIEW)
-    config.STATS.VERTEX_COUNT = len(vertices)
-    config.STATS.TRIANGLE_COUNT = len(indices) // 3
-    config.STATS.GEN_TIME = (time.perf_counter() - gen_start) * 1000
+    state.STATS.VERTEX_COUNT = len(vertices)
+    state.STATS.TRIANGLE_COUNT = len(indices) // 3
+    state.STATS.GEN_TIME = (time.perf_counter() - gen_start) * 1000
     utility.updateStatsDisplay()
 
     #reset opengl view
