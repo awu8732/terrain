@@ -18,13 +18,21 @@ logger = logging.getLogger("TERRAIN")
 def configureEnvironment():
     pygame.init()
     display = (config.WINDOW_WIDTH, config.WINDOW_HEIGHT)
-    
     pygame.display.set_mode(display, DOUBLEBUF | OPENGL)
-    config.HEIGHTMAP_BASE_SEED = rand.randint(1, 500)
-    state.STATS = models.stats.Stats()
-    configureLightingVectors()
+    setupStateVariables()
 
-    #initialize OpenGL and DearPy
+    initializeGl(display)
+    initializeDpg()
+    logger.info("Environment configuration complete")
+
+def initializeDpg():
+    dpg.create_context()
+    ui.initializeTerrainControls()
+    dpg.create_viewport(title = "TERRAIN CONTROLS", width = 400, height = 600)
+    dpg.setup_dearpygui()
+    dpg.show_viewport()
+
+def initializeGl(display):
     glMatrixMode(GL_PROJECTION)
     glLoadIdentity()
     gluPerspective(config.WINDOW_FOV, display[0]/display[1],
@@ -35,18 +43,16 @@ def configureEnvironment():
     glShadeModel(GL_SMOOTH)
     glEnable(GL_CULL_FACE)
 
-    dpg.create_context()
-    ui.initializeTerrainControls()
-    dpg.create_viewport(title = "TERRAIN CONTROLS", width = 400, height = 520)
-    dpg.setup_dearpygui()
-    dpg.show_viewport()
-    logger.info("Environment configuration complete")
+def setupStateVariables():
+    config.HEIGHTMAP_BASE_SEED = rand.randint(1, 500)
+    state.STATS = models.stats.Stats()
+    configureLighting()
 
 def cleanupEnvironment():
     dpg.destroy_context()
     pygame.quit()
 
-def configureLightingVectors():
+def configureLighting():
     light_dir = np.array(config.LIGHTING_L_DIR)
     config.LIGHTING_L_DIR = light_dir / np.linalg.norm(light_dir)
     config.LIGHTING_V_DIR = utility.getCameraViewVec(config.HEIGHTMAP_WIDTH, 

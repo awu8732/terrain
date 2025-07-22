@@ -7,7 +7,7 @@ logger = logging.getLogger("TERRAIN")
 
 def initializeTerrainControls():
     logger.info("Initializing terrain control panel..")
-    with dpg.window(label = "Terrain Parameters", width = 400, height = 300, pos = (0,0),
+    with dpg.window(label = "Terrain Parameters", width = 400, height = 350, pos = (0,0),
                     no_close = True, no_collapse = True, no_move = True):
         dpg.add_input_int(label = "Base Seed",
                              default_value = config.HEIGHTMAP_BASE_SEED,
@@ -104,7 +104,7 @@ def initializeTerrainControls():
         
         dpg.add_button(label = "REGNERATE", callback = requestTerrainRegeneration)
 
-    with dpg.window(label = "Terrain Stats", width = 400, height = 280, pos = (0, 310),
+    with dpg.window(label = "Terrain Stats", width = 400, height = 280, pos = (0, 360),
                     no_close = True, no_collapse = True, no_move = True):
         dpg.add_text(f"Triangles: {state.STATS.TRIANGLE_COUNT}", tag="tri_count")
         dpg.add_text(f"Vertices: {state.STATS.VERTEX_COUNT}", tag="vert_count")
