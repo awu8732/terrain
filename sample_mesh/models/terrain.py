@@ -13,6 +13,7 @@ class Terrain:
         self.scale = config.HEIGHTMAP_SCALE
 
         self.heightmap = np.zeros((self.width, self.depth))
+        self.normal_map = np.zeros((self.width * self.depth, 3), dtype=np.float32)
         self.moisture_map = np.zeros((self.width, self.depth))
         self.temperature_map = np.zeros((self.width, self.depth))
         self.biome_map = np.full((self.width, self.depth), "", dtype=object)
@@ -24,6 +25,21 @@ class Terrain:
         self._generateTemperatureMap()
         self._generateMoistureMap()
         self._assignBiomes()
+    
+    def _computeNormals(self):
+        index = 0
+        dzdx, dzdy = np.gradient(self.heightmap)
+
+        for x in range(self.width):
+            for z in range(self.depth):
+                # Normal from slope
+                nx = -dzdx[x][z]
+                ny = 1.0
+                nz = -dzdy[x][z]
+                normal = np.array([nx, ny, nz])
+                normal /= np.linalg.norm(normal)
+                self.normal_map[index] = normal
+                index+=1
 
     def _generateHeightmap(self):
         self.heightmap = core.terrain_generation.generateHeightmap(
@@ -35,6 +51,7 @@ class Terrain:
             config.HEIGHTMAP_LACUNARITY,
             config.HEIGHTMAP_BASE_SEED
         )
+        self._computeNormals()
     
     def _generateTemperatureMap(self):
         frequency = 3.0 / min(self.width, self.depth)

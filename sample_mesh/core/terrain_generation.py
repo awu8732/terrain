@@ -26,7 +26,6 @@ def generateHeightmap(width, depth, scale, octaves, persistence, lacunarity, bas
 def generateMesh(heightmap):
     vertices = []
     indices = []
-    normals = []
     width, depth = heightmap.shape
     ero_start = time.perf_counter()
     utility.resetErosionStatistics()
@@ -38,21 +37,12 @@ def generateMesh(heightmap):
             initial_velocity = config.EROSION_INIT_VELOCITY)
         config.STATS.ERO_TIME = (time.perf_counter() - ero_start) * 1000
         utility.outputErosionStatistics()
-
-    dzdx, dzdy = np.gradient(heightmap)
+        
     #generate vertice list & normal map
     for x in range(width):
         for z in range(depth):
             y = heightmap[x][z] * config.HEIGHTMAP_SCALE
             vertices.append((x,y,z))
-
-            # Normal from gradient
-            nx = -dzdx[x][z]
-            ny = 1.0
-            nz = -dzdy[x][z]
-            normal = np.array([nx, ny, nz])
-            normal /= np.linalg.norm(normal)
-            normals.append(tuple(normal))
 
     #assign generic triangle indices
     for x in range(width - 1):
@@ -65,12 +55,12 @@ def generateMesh(heightmap):
             indices.append((top_left, bottom_left, top_right))
             indices.append((top_right, bottom_left, bottom_right))
 
-    return vertices, indices, normals
+    return vertices, indices
 
 def regenerateTerrain():   
     gen_start = time.perf_counter()
     terrain = models.terrain.Terrain()
-    vertices, indices, normals = generateMesh(terrain.heightmap)
+    vertices, indices = generateMesh(terrain.heightmap)
     eye = utility.getCameraEyePos(config.HEIGHTMAP_WIDTH, config.HEIGHTMAP_DEPTH, config.ELEVATION_VIEW)
     config.STATS.VERTEX_COUNT = len(vertices)
     config.STATS.TRIANGLE_COUNT = len(indices) // 3
@@ -81,7 +71,7 @@ def regenerateTerrain():
     glMatrixMode(GL_MODELVIEW)
     glLoadIdentity()
     glTranslatef(-eye[0], -eye[1], -eye[2])
-    return vertices, indices, normals, terrain.biome_map
+    return vertices, indices, terrain.normal_map, terrain.biome_map
 
 def renderTerrain(vertices, indices, normals, biome_map):
     intensities = computeBlinnPhongIntensities_numba(
@@ -109,7 +99,7 @@ def renderTerrain(vertices, indices, normals, biome_map):
                 glVertex3fv(vertex)
     glEnd()
 
-@njit
+#@njit
 def computeBlinnPhongIntensities_numba(normals, light_dir, view_dir, 
                                      k_ambient, k_diffuse, k_specular, shininess):
     intensities = np.zeros(normals.shape[0])
