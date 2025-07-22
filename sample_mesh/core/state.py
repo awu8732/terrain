@@ -1,2 +1,4 @@
 TERRAIN_NEEDS_UPDATE = False
 TERRAIN_REGEN_REQ = False
+
+MESH = None

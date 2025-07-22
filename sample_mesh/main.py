@@ -21,7 +21,7 @@ logger = logging.getLogger("TERRAIN")
 
 def main():
     env.configureEnvironment()
-    vertices, indices, normals, biome_map = regenerateTerrain()
+    normals, biome_map = regenerateTerrain()
     terrainParamsToLogger(True)
 
     running = True
@@ -36,7 +36,7 @@ def main():
 
         if state.TERRAIN_NEEDS_UPDATE and state.TERRAIN_REGEN_REQ:
             try:
-                vertices, indices, normals, biome_map = regenerateTerrain()
+                normals, biome_map = regenerateTerrain()
                 terrainParamsToLogger()
             except Exception as e:
                 logger.error(f"Regeneration failed: {e}")
@@ -47,7 +47,7 @@ def main():
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
         render_start = time.perf_counter()
         glPushMatrix()
-        renderTerrain(vertices, indices, normals, biome_map)
+        renderTerrain(normals, biome_map)
         glPopMatrix()
         
         #stats timing

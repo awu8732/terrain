@@ -9,8 +9,10 @@ from OpenGL.GLU import *
 
 import configuration as config
 import core.ui_manager as ui
-import models.stats
+import models
 import core.state as state
+import models.mesh
+import models.stats
 import utility
 
 logger = logging.getLogger("TERRAIN")
@@ -46,6 +48,7 @@ def initializeGl(display):
 def setupStateVariables():
     config.HEIGHTMAP_BASE_SEED = rand.randint(1, 500)
     state.STATS = models.stats.Stats()
+    state.MESH = models.mesh.Mesh()
     configureLighting()
 
 def cleanupEnvironment():

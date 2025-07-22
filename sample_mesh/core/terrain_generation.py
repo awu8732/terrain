@@ -25,8 +25,9 @@ def generateHeightmap(width, depth, scale, octaves, persistence, lacunarity, bas
     return heights
 
 def generateMesh(heightmap):
-    vertices = []
-    indices = []
+    state.MESH.vertices = []
+    state.MESH.indices = []
+
     width, depth = heightmap.shape
     ero_start = time.perf_counter()
     utility.resetErosionStatistics()
@@ -43,7 +44,7 @@ def generateMesh(heightmap):
     for x in range(width):
         for z in range(depth):
             y = heightmap[x][z] * config.HEIGHTMAP_SCALE
-            vertices.append((x,y,z))
+            state.MESH.vertices.append((x,y,z))
 
     #assign generic triangle indices
     for x in range(width - 1):
@@ -52,19 +53,16 @@ def generateMesh(heightmap):
             top_right = (x + 1) * depth + z
             bottom_left = x * depth + (z + 1)
             bottom_right = (x + 1) * depth + (z + 1)
+            state.MESH.indices.append((top_left, bottom_left, top_right))
+            state.MESH.indices.append((top_right, bottom_left, bottom_right))
 
-            indices.append((top_left, bottom_left, top_right))
-            indices.append((top_right, bottom_left, bottom_right))
-
-    return vertices, indices
-
-def regenerateTerrain():   
+def regenerateTerrain():
     gen_start = time.perf_counter()
     terrain = models.terrain.Terrain()
-    vertices, indices = generateMesh(terrain.heightmap)
+    generateMesh(terrain.heightmap)
     eye = utility.getCameraEyePos(config.HEIGHTMAP_WIDTH, config.HEIGHTMAP_DEPTH, config.ELEVATION_VIEW)
-    state.STATS.VERTEX_COUNT = len(vertices)
-    state.STATS.TRIANGLE_COUNT = len(indices) // 3
+    state.STATS.VERTEX_COUNT = len(state.MESH.vertices)
+    state.STATS.TRIANGLE_COUNT = len(state.MESH.indices) // 3
     state.STATS.GEN_TIME = (time.perf_counter() - gen_start) * 1000
     utility.updateStatsDisplay()
 
@@ -72,9 +70,11 @@ def regenerateTerrain():
     glMatrixMode(GL_MODELVIEW)
     glLoadIdentity()
     glTranslatef(-eye[0], -eye[1], -eye[2])
-    return vertices, indices, terrain.normal_map, terrain.biome_map
+    return terrain.normal_map, terrain.biome_map
 
-def renderTerrain(vertices, indices, normals, biome_map):
+def renderTerrain(normals, biome_map):
+    vertices = state.MESH.vertices
+    indices = state.MESH.indices
     intensities = computeBlinnPhongIntensities_numba(
         np.array(normals),
         config.LIGHTING_L_DIR,
