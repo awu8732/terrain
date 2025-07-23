@@ -73,15 +73,17 @@ def renderTerrain(normals, biome_map):
     for triangle in indices:
         for index in triangle:
             vertex = vertices[index]
-            if config.SIMULATE_BIOME:
-                base_color = utility.getBiomeColorFromVertex(vertices[index], biome_map)
-                shaded_color = np.array(base_color) * intensities[index]
+            intensity = intensities[index]
 
-                glColor3f(*shaded_color)
-                glVertex3f(*vertex)
+            if config.SIMULATE_BIOME:
+                base_color = utility.getBiomeColorFromVertex(vertex, biome_map)
             else:
-                glColor3f(0.3 + vertex[1] * 0.02, 0.30 + vertex[1] * 0.1, 0.3)
-                glVertex3fv(vertex)
+                base_color = np.array([0.3 + vertex[1] * 0.02, 0.3 + vertex[1] * 0.10, 0.3])
+
+            shaded_color = np.clip(np.array(base_color) * intensity, 0.0, 1.0)
+
+            glColor3f(*shaded_color)
+            glVertex3f(*vertex)
     glEnd()
 
 @njit
