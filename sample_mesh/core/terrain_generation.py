@@ -11,23 +11,9 @@ import models.terrain
 import core.state as state
 import utility
 
-def generateHeightmap(width, depth, scale, octaves, persistence, lacunarity, base_seed):
-    heights = np.zeros((width, depth))
-    for x in range(width):
-        for z in range(depth):
-            nx = x / width * scale
-            nz = z / depth * scale
-            heights[x][z] = pnoise2(nx, nz, 
-                                    octaves = octaves, 
-                                    persistence = persistence,
-                                    lacunarity = lacunarity, 
-                                    base = base_seed)
-    return heights
-
 def generateMesh(heightmap):
     state.MESH.vertices = []
     state.MESH.indices = []
-
     width, depth = heightmap.shape
     ero_start = time.perf_counter()
     utility.resetErosionStatistics()
@@ -40,13 +26,11 @@ def generateMesh(heightmap):
         state.STATS.ERO_TIME = (time.perf_counter() - ero_start) * 1000
         utility.outputErosionStatistics()
         
-    #generate vertice list & normal map
+    #generate vertice list & assign triangle indices
     for x in range(width):
         for z in range(depth):
             y = heightmap[x][z] * config.HEIGHTMAP_SCALE
             state.MESH.vertices.append((x,y,z))
-
-    #assign generic triangle indices
     for x in range(width - 1):
         for z in range(depth - 1):
             top_left = x * depth + z

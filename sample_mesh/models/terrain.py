@@ -1,6 +1,5 @@
 from noise import pnoise2
 import numpy as np
-#import matplotlib.pyplot as plt
 
 import configuration as config
 import core.terrain_generation
@@ -42,15 +41,15 @@ class Terrain:
                 index+=1
 
     def _generateHeightmap(self):
-        self.heightmap = core.terrain_generation.generateHeightmap(
-            self.width,
-            self.depth,
-            self.scale,
-            config.HEIGHTMAP_OCTAVES,
-            config.HEIGHTMAP_PERSISTENCE,
-            config.HEIGHTMAP_LACUNARITY,
-            config.HEIGHTMAP_BASE_SEED
-        )
+        for x in range(self.width):
+            for z in range(self.depth):
+                nx = x / self.width * self.scale
+                nz = z / self.depth * self.scale
+                self.heightmap[x][z] = pnoise2(nx, nz, 
+                                        octaves = config.HEIGHTMAP_OCTAVES, 
+                                        persistence = config.HEIGHTMAP_PERSISTENCE,
+                                        lacunarity = config.HEIGHTMAP_LACUNARITY, 
+                                        base = config.HEIGHTMAP_BASE_SEED)
         self._computeNormals()
     
     def _generateTemperatureMap(self):
