@@ -1,4 +1,4 @@
-# Procedural Terrain Generator
+# ⛰️⛰️ Procedural Terrain Generator ⛰️⛰️
 
 A real-time 3D terrain generation application using OpenGL and Python, featuring Perlin noise-based heightmaps, hydraulic erosion simulation, biome generation, and Blinn-Phong lighting.
 
@@ -38,7 +38,7 @@ numba
 ## Project Structure
 
 ```
-sample_mesh/
+TERRAIN/
 ├── main.py                 # Application entry point and main loop
 ├── configuration.py        # Global configuration constants
 ├── utility.py             # Utility functions and helpers
@@ -47,10 +47,11 @@ sample_mesh/
 │   ├── state.py           # Global application state
 │   ├── terrain_generation.py  # Terrain generation and rendering logic
 │   └── ui_manager.py      # User interface controls and callbacks
-└── models/
-    ├── mesh.py            # Mesh data structure
-    ├── stats.py           # Performance statistics tracking
-    └── terrain.py         # Terrain generation and biome calculation
+├── models/
+|    ├── mesh.py            # Mesh data structure
+|    ├── stats.py           # Performance statistics tracking
+|    └── terrain.py         # Terrain generation and biome calculation
+└── sandbox/                # Trial scripts for terrain modeling & OpenGL rendering
 ```
 
 ## Configuration

@@ -3,7 +3,7 @@ import numpy as np
 
 import configuration as config
 import core.terrain_generation
-import utility
+from utility import _utility_manager
 
 class Terrain:
     def __init__(self):
@@ -88,4 +88,4 @@ class Terrain:
             for z in range(self.depth):
                 t = self.temperature_map[x][z]
                 m = self.moisture_map[x][z]
-                self.biome_map[x][z] = utility.getBiome(t,m)
+                self.biome_map[x][z] = _utility_manager.get_biome(t,m)
