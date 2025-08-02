@@ -1,11 +1,17 @@
 from noise import pnoise2
 import numpy as np
-
 import configuration as config
-import core.terrain_generation
 from utility import _utility_manager
 
 class Terrain:
+    """
+    A comprehensive terrain generation system that creates realistic landscapes using 
+    Perlin noise algorithms. This class generates heightmaps, temperature maps, 
+    moisture maps, and assigns biomes based on environmental conditions.
+    
+    The terrain system uses multiple noise layers to create natural-looking variations
+    in elevation, climate, and ecosystem distribution across a 2D grid.
+    """
     def __init__(self):
         self.width = config.HEIGHTMAP_WIDTH
         self.depth = config.HEIGHTMAP_DEPTH
@@ -26,6 +32,9 @@ class Terrain:
         self._assignBiomes()
     
     def _computeNormals(self):
+        """Calculate surface normal vectors for each point on the heightmap using
+        gradient analysis. These normals are essential for realistic lighting
+        and shading effects in 3D rendering."""
         index = 0
         dzdx, dzdy = np.gradient(self.heightmap)
 
@@ -41,6 +50,7 @@ class Terrain:
                 index+=1
 
     def _generateHeightmap(self):
+        """Generate the base terrain heightmap using multi-octave Perlin noise"""
         for x in range(self.width):
             for z in range(self.depth):
                 nx = x / self.width * self.scale
@@ -53,6 +63,7 @@ class Terrain:
         self._computeNormals()
     
     def _generateTemperatureMap(self):
+        """Generate a temperature map influenced by both Perlin noise and elevation."""
         frequency = 3.0 / min(self.width, self.depth)
         for x in range(self.width):
             for z in range(self.depth):
@@ -69,6 +80,7 @@ class Terrain:
         # plt.show()
 
     def _generateMoistureMap(self):
+        """Generate a moisture/humidity map based on Perlin noise and elevation effects."""
         frequency = 3.0 / min(self.width, self.depth)
         for x in range(self.width):
             for z in range(self.depth):
@@ -84,6 +96,8 @@ class Terrain:
         # plt.show()
 
     def _assignBiomes(self):
+        """Assign appropriate biome types to each terrain cell based on temperature
+        and moisture conditions."""
         for x in range(self.width):
             for z in range(self.depth):
                 t = self.temperature_map[x][z]
